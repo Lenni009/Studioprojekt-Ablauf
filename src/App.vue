@@ -1,7 +1,14 @@
 <script setup lang="ts">
-console.log('Hello Eisvana!');
+import Schedule from './components/Schedule.vue';
 </script>
 
 <template>
-  <div>Hello Eisvana!</div>
+  <h1 class="title">Studioprojekt Ablauf</h1>
+  <Schedule />
 </template>
+
+<style scoped lang="scss">
+.title {
+  text-align: center;
+}
+</style>
