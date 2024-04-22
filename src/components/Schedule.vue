@@ -197,6 +197,7 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
 .controls {
   display: flex;
   justify-content: end;
+  gap: 1rem;
   margin-block: 1rem;
 
   > * {
@@ -208,6 +209,7 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
     display: flex;
     justify-content: end;
     gap: 0.5rem;
+    flex-wrap: wrap;
 
     * {
       margin: 0;
