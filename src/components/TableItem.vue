@@ -12,22 +12,14 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
 </script>
 
 <template>
-  <div
-    :class="{ 'is-completed': isCompleted }"
-    class="table-item"
-  >
-    <div>{{ data.name }}</div>
-    <div>{{ data.timestamp }}</div>
-  </div>
+  <tr :class="{ 'is-completed': isCompleted }">
+    <td>{{ data.name }}</td>
+    <td>{{ data.timestamp }}</td>
+  </tr>
 </template>
 
 <style scoped lang="scss">
-.table-item {
-  display: flex;
-  gap: 0.5rem;
-
-  &.is-completed {
-    background-color: green;
-  }
+.is-completed * {
+  background-color: green !important;
 }
 </style>

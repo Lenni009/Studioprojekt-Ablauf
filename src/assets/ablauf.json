@@ -1,6 +1,14 @@
 [
   {
-    "timestamp": "0:10",
+    "timestamp": "0:03",
     "name": "test"
+  },
+  {
+    "timestamp": "0:08",
+    "name": "baum"
+  },
+  {
+    "timestamp": "0:15",
+    "name": "nein doch oh"
   }
 ]

@@ -3,12 +3,20 @@ import Schedule from './components/Schedule.vue';
 </script>
 
 <template>
-  <h1 class="title">Studioprojekt Ablauf</h1>
-  <Schedule />
+  <header>
+    <h1 class="title">Studioprojekt Ablauf</h1>
+  </header>
+  <main>
+    <Schedule />
+  </main>
 </template>
 
 <style scoped lang="scss">
-.title {
-  text-align: center;
+header {
+  margin-block-start: 2rem;
+
+  .title {
+    text-align: center;
+  }
 }
 </style>
