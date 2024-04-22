@@ -1,0 +1,25 @@
+{
+  "name": "app-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write src/"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.6",
+    "prettier": "^3.2.4",
+    "sass": "^1.74.1",
+    "typescript": "^5.4.4",
+    "vite": "^5.2.8",
+    "vue": "^3.4.21"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.0.2",
+    "pinia": "^2.1.7",
+    "vue-tsc": "^2.0.11"
+  }
+}
