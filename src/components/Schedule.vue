@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import json from '@/assets/ablauf.json';
+import schedule from '@/assets/ablauf.json';
 import { useTimestamp } from '@vueuse/core';
 import { computed, ref } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
+import type { ScheduleItem } from '@/types/schedule';
+import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 
 const startDate = Date.now();
 
@@ -19,12 +21,9 @@ const timeElapsed = computed(() =>
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
 const formattedTime = computed(() => timestampToString(timeElapsed.value));
 
-function timestampToString(time: number): string {
-  const timeInSeconds = Math.floor(time / 1000);
-  const minutes = Math.floor(timeInSeconds / 60);
-  const seconds = timeInSeconds % 60;
-  return `${Math.floor(minutes)}:${seconds.toString().padStart(2, '0')}`;
-}
+const lastEventIndex = computed(() =>
+  schedule.findLastIndex((item: ScheduleItem) => stringToTimestamp(item.timestamp) >= timeElapsed.value)
+);
 
 function pause() {
   pausedAtTimestamp.value = Date.now();
@@ -39,20 +38,30 @@ function resume() {
 </script>
 
 <template>
+  <div
+    :class="{ 'is-paused': isPaused }"
+    class="timer"
+  >
+    {{ formattedTime }}
+  </div>
+
   <progress
     class="progress"
     :max="expectedLength"
     :value="timeElapsedInSeconds"
   ></progress>
 
-  <div>
-    <span>Current Date:</span>
-    <span>{{ formattedTime }}</span>
-  </div>
+  <div v-if="lastEventIndex !== -1">Last: {{ schedule[lastEventIndex].name }}</div>
+  <template v-if="lastEventIndex !== schedule.length - 1">
+    <div>Next: {{ schedule[lastEventIndex + 1].name }}</div>
+    <div>
+      Next in: {{ getFormattedTimeDiff(timeElapsed, stringToTimestamp(schedule[lastEventIndex + 1].timestamp)) }}
+    </div>
+  </template>
 
   <div class="table">
     <TableItem
-      v-for="item in json"
+      v-for="item in schedule"
       :data="item"
       :key="item.name"
       :ts="timeElapsed"
@@ -78,5 +87,18 @@ function resume() {
 .table {
   display: flex;
   flex-direction: column;
+}
+
+.timer {
+  font-size: 4rem;
+  text-align: center;
+
+  &.is-paused {
+    background-color: red;
+  }
+}
+
+.time-until-next {
+  font-size: larger;
 }
 </style>

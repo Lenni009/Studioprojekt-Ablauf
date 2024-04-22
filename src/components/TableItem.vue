@@ -1,18 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { stringToTimestamp } from '@/helpers/time';
+import type { ScheduleItem } from '@/types/schedule';
 
 const props = defineProps<{
-  data: {
-    name: string;
-    timestamp: string;
-  };
+  data: ScheduleItem;
   ts: number;
 }>();
-
-function stringToTimestamp(time: string): number {
-  const [minutes, seconds] = time.split(':').map((item) => parseInt(item));
-  return (minutes * 60 + seconds) * 1000;
-}
 
 const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.timestamp));
 </script>
