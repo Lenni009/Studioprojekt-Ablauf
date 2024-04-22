@@ -1,39 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { stringToTimestamp } from '@/helpers/time';
+import type { ScheduleItem } from '@/types/schedule';
 
 const props = defineProps<{
-  data: {
-    name: string;
-    timestamp: string;
-  };
+  data: ScheduleItem;
   ts: number;
 }>();
-
-function stringToTimestamp(time: string): number {
-  const [minutes, seconds] = time.split(':').map((item) => parseInt(item));
-  return (minutes * 60 + seconds) * 1000;
-}
 
 const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.timestamp));
 </script>
 
 <template>
-  <div
-    :class="{ 'is-completed': isCompleted }"
-    class="table-item"
-  >
-    <div>{{ data.name }}</div>
-    <div>{{ data.timestamp }}</div>
-  </div>
+  <tr :class="{ 'is-completed': isCompleted }">
+    <td>{{ data.name }}</td>
+    <td>{{ data.timestamp }}</td>
+  </tr>
 </template>
 
 <style scoped lang="scss">
-.table-item {
-  display: flex;
-  gap: 0.5rem;
-
-  &.is-completed {
-    background-color: green;
-  }
+.is-completed * {
+  background-color: green !important;
 }
 </style>
