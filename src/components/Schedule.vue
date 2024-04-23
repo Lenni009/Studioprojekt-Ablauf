@@ -33,10 +33,7 @@ watch(timeElapsed, (newVal) => {
   const newFilter = schedule.filter((item: ScheduleItem) => newVal >= stringToTimestamp(item.timestamp));
   const newFilterLength = newFilter.length;
   const oldFilterLength = completedItems.value.length;
-  if (newFilterLength !== oldFilterLength) {
-    console.log('updating');
-    updateCompletedItems();
-  }
+  if (newFilterLength !== oldFilterLength) updateCompletedItems();
 });
 
 const futureItems = computed(() => schedule.filter((item: ScheduleItem) => !completedItems.value.includes(item)));
