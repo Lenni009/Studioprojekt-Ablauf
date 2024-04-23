@@ -1,14 +1,82 @@
 [
   {
-    "timestamp": "0:03",
-    "name": "test"
+    "timestamp": "0:00",
+    "name": "Intro + Recap"
+  },
+  {
+    "timestamp": "4:00",
+    "name": "Grafik"
+  },
+  {
+    "timestamp": "4:20",
+    "name": "Studio"
   },
   {
     "timestamp": "0:08",
-    "name": "baum"
+    "name": "Studio"
   },
   {
     "timestamp": "0:15",
-    "name": "nein doch oh"
+    "name": "Studio"
+  },
+  {
+    "timestamp": "0:15",
+    "name": "Szenisch Feldweg"
+  },
+  {
+    "timestamp": "0:15",
+    "name": "Studio"
+  },
+  {
+    "timestamp": "0:15",
+    "name": "Werbeblock 1"
+  },
+  {
+    "timestamp": "0:15",
+    "name": "Bluescreen"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Szenisch"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Studio"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Werbeblock 2"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Bluescreen"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Studio"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Szenisch"
+  },
+  {
+    "timestamp": "0:12",
+    "name": "Grafik"
+  },
+  {
+    "timestamp": "28:40",
+    "name": "Taverne Outro"
+  },
+  {
+    "timestamp": "29:40",
+    "name": "Outro"
+  },
+  {
+    "timestamp": "29:55",
+    "name": "Logo"
+  },
+  {
+    "timestamp": "30:00",
+    "name": "Ende"
   }
 ]
