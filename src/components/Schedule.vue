@@ -56,7 +56,7 @@ function jumpTo(ts: number) {
 
 <template>
   <div
-    :class="{ 'is-paused': isPaused }"
+    :class="{ 'is-paused': isPaused, 'is-too-much': timeElapsedInSeconds > expectedLength }"
     class="timer"
   >
     {{ formattedTime }}
@@ -267,7 +267,11 @@ function jumpTo(ts: number) {
   text-align: center;
 
   &.is-paused {
-    background-color: red;
+    background-color: tomato;
+  }
+
+  &.is-too-much {
+    color: crimson;
   }
 }
 
