@@ -153,8 +153,8 @@ function jumpTo(ts: number) {
           tag="tbody"
         >
           <TableItem
-            v-memo="[completedItems]"
             v-for="item in futureItems"
+            v-memo="[completedItems]"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
@@ -177,8 +177,8 @@ function jumpTo(ts: number) {
           tag="tbody"
         >
           <TableItem
-            v-memo="[completedItems]"
             v-for="item in completedItems"
+            v-memo="[completedItems]"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
