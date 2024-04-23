@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import schedule from '@/assets/ablauf.json';
 import { useTimestamp } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
 import type { ScheduleItem } from '@/types/schedule';
@@ -21,16 +21,16 @@ const timeElapsed = computed(() =>
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
 const formattedTime = computed(() => timestampToString(timeElapsed.value));
 
-// Chrome updates the HTML every millisecond, so we have to avoid this by only updating the UI when something actually changed.
+// Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
 const completedItems = ref<ScheduleItem[]>([]);
 
-const updateCompletedItems = () =>
-  (completedItems.value = schedule
-    .filter((item: ScheduleItem) => timeElapsed.value >= stringToTimestamp(item.timestamp))
-    .toReversed());
+const getCompletedItems = () =>
+  schedule.filter((item: ScheduleItem) => timeElapsed.value >= stringToTimestamp(item.timestamp));
 
-watch(timeElapsed, (newVal) => {
-  const newFilter = schedule.filter((item: ScheduleItem) => newVal >= stringToTimestamp(item.timestamp));
+const updateCompletedItems = () => (completedItems.value = getCompletedItems().toReversed());
+
+watchEffect(() => {
+  const newFilter = getCompletedItems();
   const newFilterLength = newFilter.length;
   const oldFilterLength = completedItems.value.length;
   if (newFilterLength !== oldFilterLength) updateCompletedItems();
