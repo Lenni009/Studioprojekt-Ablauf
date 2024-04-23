@@ -8,18 +8,44 @@ const props = defineProps<{
   ts: number;
 }>();
 
+const emit = defineEmits<{
+  skip: [amount: number];
+}>();
+
 const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.timestamp));
 </script>
 
 <template>
-  <tr :class="{ 'is-completed': isCompleted }">
+  <tr
+    :class="{ 'is-completed': isCompleted }"
+    class="table-row"
+    @click="$emit('skip', stringToTimestamp(data.timestamp))"
+  >
     <td>{{ data.name }}</td>
     <td>{{ data.timestamp }}</td>
   </tr>
 </template>
 
 <style scoped lang="scss">
-.is-completed * {
-  background-color: green !important;
+.table-row {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--pico-table-row-stripped-background-color);
+  }
+
+  td {
+    background-color: inherit;
+    color: inherit;
+  }
+
+  &.is-completed {
+    background-color: green;
+    color: white;
+
+    &:hover {
+      background-color: color-mix(in srgb, green, var(--pico-table-row-stripped-background-color));
+    }
+  }
 }
 </style>

@@ -47,6 +47,11 @@ function reset() {
 }
 
 const skip = (seconds: number) => (startDate.value += seconds * 1000);
+
+function jumpTo(ts: number) {
+  const distanceToCurrent = ts - timeElapsed.value;
+  startDate.value += distanceToCurrent * -1;
+}
 </script>
 
 <template>
@@ -67,8 +72,9 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
     <Transition mode="out-in">
       <article
         v-if="nextEvent"
-        :key="nextEvent.name"
+        :key="`${nextEvent.timestamp}${nextEvent.name}`"
         class="next-event-card"
+        @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
       >
         <header>Upcoming:</header>
         <div class="next-event-text">
@@ -135,8 +141,9 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
           <TableItem
             v-for="item in futureItems"
             :data="item"
-            :key="item.name"
+            :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
+            @skip="jumpTo"
           />
         </TransitionGroup>
       </table>
@@ -157,8 +164,9 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
           <TableItem
             v-for="item in completedItems"
             :data="item"
-            :key="item.name"
+            :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
+            @skip="jumpTo"
           />
         </TransitionGroup>
       </table>
@@ -221,6 +229,19 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
   }
 
   .next-event-card {
+    cursor: pointer;
+
+    &:hover:not(.v-enter-active, .v-leave-active) {
+      &,
+      & * {
+        background-color: color-mix(
+          in srgb,
+          var(--pico-contrast-background) 3%,
+          var(--pico-card-background-color) 100%
+        );
+      }
+    }
+
     header {
       text-align: center;
       font-weight: bold;
