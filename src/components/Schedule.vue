@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import schedule from '@/assets/ablauf.json';
 import { useTimestamp } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
 import type { ScheduleItem } from '@/types/schedule';
@@ -21,9 +21,23 @@ const timeElapsed = computed(() =>
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
 const formattedTime = computed(() => timestampToString(timeElapsed.value));
 
-const completedItems = computed(() =>
-  schedule.filter((item: ScheduleItem) => timeElapsed.value >= stringToTimestamp(item.timestamp)).toReversed()
-);
+// Chrome updates the HTML every millisecond, so we have to avoid this by only updating the UI when something actually changed.
+const completedItems = ref<ScheduleItem[]>([]);
+
+const updateCompletedItems = () =>
+  (completedItems.value = schedule
+    .filter((item: ScheduleItem) => timeElapsed.value >= stringToTimestamp(item.timestamp))
+    .toReversed());
+
+watch(timeElapsed, (newVal) => {
+  const newFilter = schedule.filter((item: ScheduleItem) => newVal >= stringToTimestamp(item.timestamp));
+  const newFilterLength = newFilter.length;
+  const oldFilterLength = completedItems.value.length;
+  if (newFilterLength !== oldFilterLength) {
+    console.log('updating');
+    updateCompletedItems();
+  }
+});
 
 const futureItems = computed(() => schedule.filter((item: ScheduleItem) => !completedItems.value.includes(item)));
 
@@ -139,6 +153,7 @@ function jumpTo(ts: number) {
           tag="tbody"
         >
           <TableItem
+            v-memo="[completedItems]"
             v-for="item in futureItems"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
@@ -162,6 +177,7 @@ function jumpTo(ts: number) {
           tag="tbody"
         >
           <TableItem
+            v-memo="[completedItems]"
             v-for="item in completedItems"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
