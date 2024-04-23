@@ -231,9 +231,15 @@ function jumpTo(ts: number) {
   .next-event-card {
     cursor: pointer;
 
-    &:hover,
-    &:hover * {
-      background-color: color-mix(in srgb, var(--pico-contrast-background) 3%, var(--pico-card-background-color) 100%);
+    &:hover:not(.v-enter-active, .v-leave-active) {
+      &,
+      & * {
+        background-color: color-mix(
+          in srgb,
+          var(--pico-contrast-background) 3%,
+          var(--pico-card-background-color) 100%
+        );
+      }
     }
 
     header {
