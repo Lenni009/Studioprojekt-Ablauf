@@ -67,7 +67,7 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
     <Transition mode="out-in">
       <article
         v-if="nextEvent"
-        :key="nextEvent.name"
+        :key="nextEvent.timestamp"
         class="next-event-card"
       >
         <header>Upcoming:</header>
@@ -135,7 +135,7 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
           <TableItem
             v-for="item in futureItems"
             :data="item"
-            :key="item.name"
+            :key="item.timestamp"
             :ts="timeElapsed"
           />
         </TransitionGroup>
@@ -157,7 +157,7 @@ const skip = (seconds: number) => (startDate.value += seconds * 1000);
           <TableItem
             v-for="item in completedItems"
             :data="item"
-            :key="item.name"
+            :key="item.timestamp"
             :ts="timeElapsed"
           />
         </TransitionGroup>
