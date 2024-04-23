@@ -233,7 +233,7 @@ function jumpTo(ts: number) {
 
     &:hover,
     &:hover * {
-      background-color: color-mix(in srgb, var(--pico-contrast-background) 20%, var(--pico-card-background-color) 100%);
+      background-color: color-mix(in srgb, var(--pico-contrast-background) 3%, var(--pico-card-background-color) 100%);
     }
 
     header {
