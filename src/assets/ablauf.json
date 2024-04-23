@@ -1,82 +1,78 @@
 [
   {
-    "timestamp": "0:00",
+    "length": "4:00",
     "name": "Intro + Recap"
   },
   {
-    "timestamp": "4:00",
-    "name": "Grafik"
+    "length": "0:20",
+    "name": "Anmod"
   },
   {
-    "timestamp": "4:20",
+    "length": "0:20",
     "name": "Studio"
   },
   {
-    "timestamp": "0:08",
+    "length": "0:40",
+    "name": "Taverne"
+  },
+  {
+    "length": "0:20",
     "name": "Studio"
   },
   {
-    "timestamp": "0:15",
-    "name": "Studio"
-  },
-  {
-    "timestamp": "0:15",
+    "length": "1:50",
     "name": "Szenisch Feldweg"
   },
   {
-    "timestamp": "0:16",
-    "name": "Studio"
+    "length": "0:20",
+    "name": "Tisch"
   },
   {
-    "timestamp": "0:15",
+    "length": "1:15",
     "name": "Werbeblock 1"
   },
   {
-    "timestamp": "0:15",
+    "length": "0:30",
+    "name": "Bluescreen See"
+  },
+  {
+    "length": "0:48",
+    "name": "Szenisch Fährmann 1"
+  },
+  {
+    "length": "0:30",
+    "name": "Tisch"
+  },
+  {
+    "length": "0:33",
+    "name": "Szenisch Fährmann 2"
+  },
+  {
+    "length": "0:30",
     "name": "Bluescreen"
   },
   {
-    "timestamp": "0:12",
-    "name": "Szenisch"
-  },
-  {
-    "timestamp": "0:17",
-    "name": "Studio"
-  },
-  {
-    "timestamp": "0:12",
+    "length": "1:40",
     "name": "Werbeblock 2"
   },
   {
-    "timestamp": "0:18",
-    "name": "Bluescreen"
+    "length": "0:20",
+    "name": "Bluescreen Ruine"
   },
   {
-    "timestamp": "0:19",
-    "name": "Studio"
+    "length": "6:00",
+    "name": "Szenisch Ruine"
   },
   {
-    "timestamp": "0:20",
-    "name": "Szenisch"
+    "length": "1:00",
+    "name": "Taverne"
   },
   {
-    "timestamp": "0:21",
-    "name": "Grafik"
-  },
-  {
-    "timestamp": "28:40",
-    "name": "Taverne Outro"
-  },
-  {
-    "timestamp": "29:40",
+    "length": "0:15",
     "name": "Outro"
   },
   {
-    "timestamp": "29:55",
+    "length": "0:05",
     "name": "Logo"
-  },
-  {
-    "timestamp": "30:00",
-    "name": "Ende"
   }
 ]
