@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import schedule from '@/assets/ablauf.json';
+import rawSchedule from '@/assets/ablauf.json';
 import { useTimestamp } from '@vueuse/core';
 import { computed, ref, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
-import type { ScheduleItem } from '@/types/schedule';
+import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
+
+const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
+const timestamps: number[] = [0];
+lengths.forEach((item, idx) => timestamps.push(stringToTimestamp(item) + timestamps[idx]));
+
+const totalLengthInSeconds = (timestamps.at(-1) ?? 0) / 1000;
+
+const schedule: ScheduleItem[] = rawSchedule.map((item: RawScheduleItem, idx: number) => ({
+  name: item.name,
+  timestamp: timestampToString(timestamps[idx]),
+}));
 
 const startDate = ref(Date.now());
 
@@ -79,6 +90,13 @@ function jumpTo(ts: number) {
     :value="timeElapsedInSeconds"
   ></progress>
 
+  <p
+    v-if="totalLengthInSeconds !== expectedLength"
+    class="warning"
+  >
+    Planned time is too {{ totalLengthInSeconds < expectedLength ? 'short' : 'long' }}!
+  </p>
+
   <div class="controls">
     <Transition mode="out-in">
       <article
@@ -101,13 +119,13 @@ function jumpTo(ts: number) {
         type="button"
         @click="skip(10)"
       >
-        -10
+        -10s
       </button>
       <button
         type="button"
         @click="skip(-10)"
       >
-        +10
+        +10s
       </button>
       <button
         v-if="isPaused"
@@ -188,6 +206,14 @@ function jumpTo(ts: number) {
 </template>
 
 <style scoped lang="scss">
+.warning {
+  background-color: red;
+  color: white;
+  border-radius: var(--pico-border-radius);
+  padding: 0.5rem;
+  text-align: center;
+}
+
 .v-enter-active,
 .v-leave-active {
   transition: background-color 0.5s ease;
