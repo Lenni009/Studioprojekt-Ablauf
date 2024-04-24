@@ -17,12 +17,12 @@ const scheduleDataObjects: RawScheduleItem[] = [];
 
 for (const item of scheduleDataArray) {
   const obj: RawScheduleItem = {
-    name: `${item[1]} ${item[2]}`,
-    length: item[0].replaceAll(',0', '') || '0:20',
+    length: item.shift().replaceAll(',0', '') || '0:20',
+    name: item.join(' '),
   };
   scheduleDataObjects.push(obj);
 }
 
 const scheduleString = JSON.stringify(scheduleDataObjects, null, 2);
 
-Deno.writeTextFileSync('ablauf.json', scheduleString);
+Deno.writeTextFileSync('schedule.json', scheduleString);

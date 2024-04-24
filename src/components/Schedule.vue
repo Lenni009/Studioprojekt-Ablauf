@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import rawSchedule from '@/assets/ablauf.json';
+import rawSchedule from '@/assets/schedule.json';
 import { useTimestamp } from '@vueuse/core';
 import { computed, ref, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
