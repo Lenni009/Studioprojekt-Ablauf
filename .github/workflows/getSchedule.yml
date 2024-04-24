@@ -46,38 +46,30 @@ jobs:
         with:
           path: schedule.json
 
-  main:
+  commit:
     runs-on: ubuntu-latest
     needs: download
+    strategy:
+      matrix:
+        branch: [main, dev]
+
     steps:
       - name: Checkout Branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
 
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           path: src/assets
+
+      - name: Move File to Proper Location
+        run: |
+          cd src/assets
+          mv artifact/schedule.json schedule.json
 
       - name: Commit File to Main
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Update Schedule
-
-  dev:
-    runs-on: ubuntu-latest
-    needs: download
-    steps:
-      - name: Checkout Branch
-        uses: actions/checkout@v4
-        with:
-          ref: dev
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          path: src/assets
-
-      - name: Commit File to Dev
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update Schedule
