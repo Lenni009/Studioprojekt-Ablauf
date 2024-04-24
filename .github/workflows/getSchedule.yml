@@ -37,7 +37,6 @@ jobs:
         with:
           inputFile: './download/Sendeablauf.xlsx'
           outputDir: './download/'
-          outputFilename: 'Sendeablauf'
           filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
 
       - name: Parse CSV
