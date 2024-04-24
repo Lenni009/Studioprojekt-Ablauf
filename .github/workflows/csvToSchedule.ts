@@ -17,7 +17,7 @@ const scheduleDataObjects: RawScheduleItem[] = [];
 
 for (const item of scheduleDataArray) {
   const obj: RawScheduleItem = {
-    name: item[1],
+    name: `${item[1]} ${item[2]}`,
     length: item[0].replaceAll(',0', '') || '0:20',
   };
   scheduleDataObjects.push(obj);
