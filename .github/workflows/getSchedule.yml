@@ -9,12 +9,16 @@ jobs:
   schedule:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
+    permissions: write-all
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
@@ -33,7 +37,6 @@ jobs:
         with:
           inputFile: './download/Sendeablauf.xlsx'
           outputDir: './download/'
-          outputFilename: 'SendeablaufCSV'
           filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
 
       - name: Parse CSV

@@ -2,7 +2,7 @@ import { RawScheduleItem } from '../../src/types/schedule.ts';
 
 const downloadLocation = './download/';
 const separator = ',';
-const csvPath = `${downloadLocation}SendeablaufCSV.csv`;
+const csvPath = `${downloadLocation}Sendeablauf.csv`;
 
 const csvContent = Deno.readTextFileSync(csvPath);
 
