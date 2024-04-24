@@ -3,12 +3,6 @@ import { convertXlsxToCsv } from 'npm:xlsx-to-csv-ts';
 
 const downloadLocation = './download/';
 
-const result = await convertXlsxToCsv({
-  inputFile: `${downloadLocation}Sendeablauf.xlsx`,
-  outputDir: downloadLocation,
-  filter: {Länge: 'Length', Kapitel: 'Chapter'}
-})
-
 const separator = ',';
 const csvPath = `${downloadLocation}Sendeablauf.csv`;
 
