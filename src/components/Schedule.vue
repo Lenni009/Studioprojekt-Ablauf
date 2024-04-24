@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import rawSchedule from '@/assets/schedule.json';
 import { useTimestamp } from '@vueuse/core';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, reactive, ref, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
 import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
+import PeerControls from './PeerControls.vue';
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
 lengths.push('0:00');
@@ -31,6 +32,14 @@ const isPaused = ref(false);
 const pausedTime = ref(0); // milliseconds
 const pausedAtTimestamp = ref(0); // unix timestamp
 const pausedAtTimeElapsed = ref(0); // milliseconds
+
+const data = reactive({
+  startDate,
+  isPaused,
+  pausedTime,
+  pausedAtTimestamp,
+  pausedAtTimeElapsed,
+});
 
 const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
 const timeElapsed = computed(() =>
@@ -91,9 +100,29 @@ function jumpTo(ts: number) {
   pausedAtTimestamp.value = startDate.value + ts;
   pausedTime.value = 0;
 }
+
+interface SyncData {
+  startDate: number;
+  isPaused: boolean;
+  pausedTime: number;
+  pausedAtTimestamp: number;
+  pausedAtTimeElapsed: number;
+}
+function sync(stringData: string) {
+  const data: SyncData = JSON.parse(stringData);
+  startDate.value = data.startDate;
+  isPaused.value = data.isPaused;
+  pausedTime.value = data.pausedTime;
+  pausedAtTimestamp.value = data.pausedAtTimestamp;
+  pausedAtTimeElapsed.value = data.pausedAtTimeElapsed;
+}
 </script>
 
 <template>
+  <PeerControls
+    :data
+    @sync="sync"
+  />
   <div
     :class="{ 'is-paused': isPaused, 'is-too-much': timeElapsedInSeconds > expectedLength }"
     class="timer"
