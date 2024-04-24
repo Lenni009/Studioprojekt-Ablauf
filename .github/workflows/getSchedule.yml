@@ -28,6 +28,9 @@ jobs:
           sharepoint_user: ${{ secrets.SHAREPOINT_USN }}
           sharepoint_password: ${{ secrets.SHAREPOINT_PWD }}
 
+      - name: Copy xlsx for debugging
+        run: cp download/Sendeablauf.xlsx ./Sendeablauf.xlsx
+
       - name: Convert XLSX to CSV
         uses: JoeSiu/xlsx-to-csv-action@1.0.0
         with:
