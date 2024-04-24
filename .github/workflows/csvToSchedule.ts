@@ -1,9 +1,7 @@
 import { RawScheduleItem } from '../../src/types/schedule.ts';
 
-const downloadLocation = './download/';
-
 const separator = ',';
-const csvPath = `${downloadLocation}Sendeablauf.csv`;
+const csvPath = `./Sendeablauf.csv`;
 
 const csvContent = Deno.readTextFileSync(csvPath);
 
@@ -27,4 +25,4 @@ for (const item of scheduleDataArray) {
 
 const scheduleString = JSON.stringify(scheduleDataObjects, null, 2);
 
-Deno.writeTextFileSync(`${downloadLocation}ablauf.json`, scheduleString);
+Deno.writeTextFileSync('ablauf.json', scheduleString);

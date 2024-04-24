@@ -32,14 +32,13 @@ jobs:
         uses: JoeSiu/xlsx-to-csv-action@1.0.0
         with:
           inputFile: './download/Sendeablauf.xlsx'
-          outputDir: './download/'
           filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
 
       - name: Parse CSV
         run: deno run --allow-read --allow-write .github/workflows/csvToSchedule.ts
 
       - name: Copy JSON
-        run: mv download/ablauf.json src/assets/ablauf.json
+        run: mv ./ablauf.json ./src/assets/ablauf.json
 
       - name: Commit File
         uses: stefanzweifel/git-auto-commit-action@v5
