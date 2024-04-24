@@ -2,6 +2,7 @@ name: Get Schedule
 run-name: Get Schedule
 
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [schedule_update]
 
