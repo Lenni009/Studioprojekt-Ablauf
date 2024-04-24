@@ -40,7 +40,7 @@ jobs:
           filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
 
       - name: Parse CSV
-        run: deno run --allow-read --allow--write .github/workflows/csvToSchedule.ts
+        run: deno run --allow-read --allow-write .github/workflows/csvToSchedule.ts
 
       - name: Copy JSON
         run: mv download/ablauf.json src/assets/ablauf.json
