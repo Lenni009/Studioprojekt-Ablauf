@@ -1,102 +1,102 @@
 [
   {
-    "name": "Logo",
+    "name": "GF0 Logo",
     "length": "0:20"
   },
   {
-    "name": "Intro + Recap",
+    "name": "GF1 Intro + Recap",
     "length": "03:30.0"
   },
   {
-    "name": "Anmod",
+    "name": "Show1 Anmod",
     "length": "00:20.0"
   },
   {
-    "name": "Taverne",
+    "name": "ST1 Taverne",
     "length": "03:25.0"
   },
   {
-    "name": "",
+    "name": "ST2 ",
     "length": "0:20"
   },
   {
-    "name": "",
+    "name": "ST3 ",
     "length": "0:20"
   },
   {
-    "name": "Feldweg",
+    "name": "SZ1 Feldweg",
     "length": "01:49.0"
   },
   {
-    "name": "",
+    "name": "ST4 ",
     "length": "0:20"
   },
   {
-    "name": "Werbung",
+    "name": "WB1 Werbung",
     "length": "01:14.0"
   },
   {
-    "name": "Fährmann",
+    "name": "BS1 Fährmann",
     "length": "0:20"
   },
   {
-    "name": "",
+    "name": "SZ2 ",
     "length": "00:48.0"
   },
   {
-    "name": "",
+    "name": "ST5 ",
     "length": "0:20"
   },
   {
-    "name": "",
+    "name": "SZ3 ",
     "length": "00:33.0"
   },
   {
-    "name": "Wald",
+    "name": "ST6 Wald",
     "length": "0:20"
   },
   {
-    "name": "Werbung",
+    "name": "WB2 Werbung",
     "length": "01:39.0"
   },
   {
-    "name": "Ruine",
+    "name": "BS2 Ruine",
     "length": "0:20"
   },
   {
-    "name": "",
+    "name": "SZ4 ",
     "length": "01:58.0"
   },
   {
-    "name": "",
+    "name": "ST7 ",
     "length": "0:20"
   },
   {
-    "name": "",
+    "name": "SZ5 ",
     "length": "00:34.0"
   },
   {
-    "name": "",
+    "name": "ST8 ",
     "length": "0:20"
   },
   {
-    "name": "",
+    "name": "SZ6 ",
     "length": "00:05.0"
   },
   {
-    "name": "Abmod",
+    "name": "Show2 Abmod",
     "length": "0:20"
   },
   {
-    "name": "Credits",
+    "name": "ST9 + GF2 Credits",
     "length": "01:00.0"
   },
   {
-    "name": "Outro",
+    "name": "GF3 Outro",
     "length": "00:15.0"
   },
   {
-    "name": "Logo",
+    "name": "GF0 Logo",
     "length": "00:05.0"
   }
 ]
