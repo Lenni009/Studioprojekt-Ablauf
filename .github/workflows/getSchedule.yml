@@ -9,16 +9,12 @@ jobs:
   schedule:
     runs-on: ubuntu-latest
 
-    permissions: write-all
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
@@ -32,11 +28,17 @@ jobs:
           sharepoint_user: ${{ secrets.SHAREPOINT_USN }}
           sharepoint_password: ${{ secrets.SHAREPOINT_PWD }}
 
+      - name: Convert XLSX to CSV
+        uses: JoeSiu/xlsx-to-csv-action@1.0.0
+        with:
+          inputFile: './download/Sendeablauf.xlsx'
+          filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
+
       - name: Parse CSV
         run: deno run --allow-read --allow-write .github/workflows/csvToSchedule.ts
 
       - name: Copy JSON
-        run: mv download/ablauf.json src/assets/ablauf.json
+        run: mv ./ablauf.json ./src/assets/ablauf.json
 
       - name: Commit File
         uses: stefanzweifel/git-auto-commit-action@v5
