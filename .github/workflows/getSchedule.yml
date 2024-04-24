@@ -9,8 +9,7 @@ jobs:
   schedule:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
+    permissions: write-all
 
     steps:
       - name: Checkout Repo
