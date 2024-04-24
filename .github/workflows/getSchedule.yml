@@ -12,6 +12,10 @@ jobs:
     permissions:
       contents: write
 
+    concurrency:
+      group: "schedule"
+      cancel-in-progress: true
+
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
