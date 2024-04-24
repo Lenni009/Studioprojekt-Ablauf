@@ -13,5 +13,34 @@ jobs:
       contents: write
 
     steps:
-      - name: Log
-        run: echo "Hello World!"
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+
+      - name: Get Schedule File
+        uses: nicolasiannarilli/action-sharepoint-download@v1.0.0
+        with:
+          site_url: 'https://leipziggutenbergschule.sharepoint.com/sites/StudioprojektB'
+          library_folder: 'Freigegebene Dokumente/Regie'
+          target_folder: 'download'
+          sharepoint_user: ${{ secrets.SHAREPOINT_USN }}
+          sharepoint_password: ${{ secrets.SHAREPOINT_PWD }}
+
+      - name: Convert XLSX to CSV
+        uses: JoeSiu/xlsx-to-csv-action@1.0.0
+        with:
+          inputFile: 'download/Sendeablauf.xlsx'
+          outputDir: 'download/'
+          outputFilename: 'Sendeablauf'
+          filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
+
+      - name: Parse CSV
+        run: deno run --allow-read --allow--write .github/workflows/csvToSchedule.ts
+
+      - name: Copy JSON
+        run: cp download/ablauf.json src/assets/ablauf.json
+
+      - name: Commit File
+        uses: stefanzweifel/git-auto-commit-action@v5
