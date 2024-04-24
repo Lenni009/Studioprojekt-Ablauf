@@ -11,6 +11,7 @@ export function timestampToString(time: number): string {
 }
 
 export function getFormattedTimeDiff(time1: number, time2: number) {
-  const diff = time2 - time1 + 1000;
-  return timestampToString(diff);
+  // converting them to seconds rounding down to get the "expected" result on screen
+  const diff = Math.floor(time2 / 1000) - Math.floor(time1 / 1000);
+  return timestampToString(diff * 1000);
 }
