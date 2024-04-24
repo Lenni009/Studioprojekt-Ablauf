@@ -32,13 +32,6 @@ jobs:
           sharepoint_user: ${{ secrets.SHAREPOINT_USN }}
           sharepoint_password: ${{ secrets.SHAREPOINT_PWD }}
 
-      - name: Convert XLSX to CSV
-        uses: JoeSiu/xlsx-to-csv-action@1.0.0
-        with:
-          inputFile: './download/Sendeablauf.xlsx'
-          outputDir: './download/'
-          filter: '{ "Länge": "Length", "Kapitel": "Chapter" }'
-
       - name: Parse CSV
         run: deno run --allow-read --allow--write .github/workflows/csvToSchedule.ts
 
