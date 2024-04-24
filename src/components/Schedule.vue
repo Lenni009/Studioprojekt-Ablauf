@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import rawSchedule from '@/assets/ablauf.json';
+import rawSchedule from '@/assets/schedule.json';
 import { useTimestamp } from '@vueuse/core';
 import { computed, ref, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
@@ -8,6 +8,8 @@ import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
+lengths.push('0:00');
+
 const timestamps: number[] = [0];
 lengths.forEach((item, idx) => timestamps.push(stringToTimestamp(item) + timestamps[idx]));
 
@@ -18,19 +20,24 @@ const schedule: ScheduleItem[] = rawSchedule.map((item: RawScheduleItem, idx: nu
   timestamp: timestampToString(timestamps[idx]),
 }));
 
-const startDate = ref(Date.now());
+schedule.push({
+  name: 'Ende',
+  timestamp: timestampToString(timestamps.at(-1)),
+});
+
+const startDate = ref(Date.now()); // unix timestamp
 
 const isPaused = ref(false);
-const pausedTime = ref(0);
-const pausedAtTimestamp = ref(0);
-const pausedAtTimeElapsed = ref(0);
+const pausedTime = ref(0); // milliseconds
+const pausedAtTimestamp = ref(0); // unix timestamp
+const pausedAtTimeElapsed = ref(0); // milliseconds
 
-const timestamp = useTimestamp({ offset: 0 });
+const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
 const timeElapsed = computed(() =>
   isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
 );
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
-const formattedTime = computed(() => timestampToString(timeElapsed.value));
+const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
 
 // Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
 const completedItems = ref<ScheduleItem[]>([]);
@@ -63,16 +70,26 @@ function resume() {
 }
 
 function reset() {
+  const currentTimestamp = Date.now();
   pausedTime.value = 0;
-  startDate.value = Date.now();
-  isPaused.value = false;
+  startDate.value = currentTimestamp;
+  pausedAtTimeElapsed.value = 0;
+  pausedAtTimestamp.value = currentTimestamp;
 }
 
-const skip = (seconds: number) => (startDate.value += seconds * 1000);
+function skip(seconds: number) {
+  const milliseconds = seconds * 1000;
+  startDate.value += milliseconds;
+  pausedAtTimeElapsed.value += milliseconds * -1;
+}
 
 function jumpTo(ts: number) {
   const distanceToCurrent = ts - timeElapsed.value;
   startDate.value += distanceToCurrent * -1;
+  if (!isPaused.value) return;
+  pausedAtTimeElapsed.value = ts;
+  pausedAtTimestamp.value = startDate.value + ts;
+  pausedTime.value = 0;
 }
 </script>
 
@@ -85,9 +102,9 @@ function jumpTo(ts: number) {
   </div>
 
   <progress
-    class="progress"
     :max="expectedLength"
     :value="timeElapsedInSeconds"
+    class="progress"
   ></progress>
 
   <p
