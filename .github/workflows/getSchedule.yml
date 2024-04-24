@@ -1,0 +1,17 @@
+name: Get Schedule
+run-name: Get Schedule
+
+on:
+  repository_dispatch:
+    types: [schedule_update]
+
+jobs:
+  schedule:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Log
+        run: echo "Hello World!"
