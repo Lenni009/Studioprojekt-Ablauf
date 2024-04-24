@@ -8,6 +8,7 @@ import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
+lengths.push('0:00');
 const timestamps: number[] = [0];
 lengths.forEach((item, idx) => timestamps.push(stringToTimestamp(item) + timestamps[idx]));
 
@@ -17,6 +18,11 @@ const schedule: ScheduleItem[] = rawSchedule.map((item: RawScheduleItem, idx: nu
   name: item.name,
   timestamp: timestampToString(timestamps[idx]),
 }));
+
+schedule.push({
+  name: 'Ende',
+  timestamp: timestampToString(timestamps.at(-1)),
+});
 
 const startDate = ref(Date.now());
 
