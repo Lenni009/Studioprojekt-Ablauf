@@ -7,11 +7,10 @@ const csvContent = Deno.readTextFileSync(csvPath);
 
 const csvRows = csvContent.replaceAll('\r', '').split('\n');
 
-const csvDataRows = csvRows.slice(1);
-const csvRowData = csvDataRows.map((item) => item.split(separator));
+const csvRowData = csvRows.map((item) => item.split(separator));
 
 const lastDataIndex = csvRowData.findLastIndex((item) => item[1]);
-const scheduleDataArray: string[][] = csvRowData.slice(0, lastDataIndex + 1);
+const scheduleDataArray: string[][] = csvRowData.slice(1, lastDataIndex + 1); // remove header row and remove trailing math rows that are in the sheet for time calculations
 
 const scheduleDataObjects: RawScheduleItem[] = [];
 
