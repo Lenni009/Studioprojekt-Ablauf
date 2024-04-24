@@ -1,5 +1,4 @@
 import { RawScheduleItem } from '../../src/types/schedule.ts';
-import { convertXlsxToCsv } from 'npm:xlsx-to-csv-ts';
 
 const downloadLocation = './download/';
 
