@@ -88,7 +88,6 @@ peer.on('connection', (c) => {
   } else {
     // this is for the receiver
     c.on('data', (recData: unknown) => {
-      console.log(recData);
       const isValidData = isSyncData(recData);
       if (!isValidData) return;
       sync(recData);
