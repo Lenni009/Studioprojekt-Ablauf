@@ -62,13 +62,23 @@ const paramsString = window.location.search;
 const searchParams = new URLSearchParams(paramsString);
 const senderId = searchParams.get('id');
 
-const foreignUrl = ref('');
+const uniquenessPrecision = 4; // defines how many "random" numbers should be appended to the id
+const uniqueId = Date.now()
+  .toString()
+  .slice(uniquenessPrecision * -1);
+const id = `PenPixels${uniqueId}`;
+const foreignUrl = `${window.location.origin}?id=${id}`;
 
 const sendConn = ref<DataConnection[]>([]);
-const peer = new Peer();
-peer.on('open', function (id: string) {
-  foreignUrl.value = `${window.location.origin}?id=${id}`;
-
+const peer = new Peer(id, {
+  config: {
+    iceServers: [
+      { urls: 'stun:freeturn.net:5349' },
+      { urls: 'turns:freeturn.tel:5349', username: 'free', credential: 'free' },
+    ],
+  },
+});
+peer.on('open', function () {
   if (senderId) peer.connect(senderId);
 });
 
