@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import rawSchedule from '@/assets/schedule.json';
 import { useTimestamp } from '@vueuse/core';
-import { computed, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, onUnmounted, reactive, ref, watch, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
 import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
@@ -64,7 +64,7 @@ const senderId = searchParams.get('id');
 
 const foreignUrl = ref('');
 
-let sendConn: DataConnection | null;
+const sendConn = ref<DataConnection[]>([]);
 const peer = new Peer();
 peer.on('open', function (id: string) {
   foreignUrl.value = `${window.location.origin}?id=${id}`;
@@ -75,9 +75,9 @@ peer.on('open', function (id: string) {
 peer.on('connection', (c) => {
   if (!senderId) {
     // this is for the sender
-    sendConn = peer.connect(c.peer);
-
-    sendConn.on('open', () => sendSync(data));
+    const conn = peer.connect(c.peer);
+    sendConn.value.push(conn);
+    conn.on('open', () => sendSync(data));
   } else {
     // this is for the receiver
     c.on('data', (recData: unknown) => {
@@ -98,19 +98,26 @@ function isSyncData(syncData: unknown): syncData is SyncData {
 
 peer.on('disconnected', function () {
   console.log('Connection lost. Please reconnect');
-
   peer.reconnect();
 });
 peer.on('close', function () {
-  sendConn = null;
+  sendConn.value = [];
   console.log('Connection destroyed. Please refresh');
 });
 peer.on('error', function (err) {
   console.error(err);
 });
 
+onUnmounted(() => peer.destroy());
+
 function sendSync(syncData: SyncData) {
-  sendConn?.send(syncData);
+  sendConn.value.forEach((conn) => {
+    try {
+      conn.send(syncData);
+    } catch (e) {
+      console.error(e);
+    }
+  });
 }
 
 watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime], () => sendSync(data));
@@ -181,6 +188,7 @@ function jumpTo(ts: number) {
   <PeerControls
     v-if="!senderId"
     :foreign-url
+    :connected-clients="sendConn.length"
   />
   <div
     :class="{ 'is-paused': isPaused, 'is-too-much': timeElapsedInSeconds > expectedLength }"

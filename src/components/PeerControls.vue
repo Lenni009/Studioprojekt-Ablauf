@@ -4,6 +4,7 @@ import QrcodeVue from 'qrcode.vue';
 
 defineProps<{
   foreignUrl: string;
+  connectedClients: number;
 }>();
 
 const dialog = ref<HTMLDialogElement | null>(null);
@@ -14,6 +15,7 @@ const open = () => dialog.value?.showModal();
 
 <template>
   <button @click="open">Connect Here</button>
+  <p>Connected: {{ connectedClients }}</p>
   <dialog
     ref="dialog"
     @click.self="close"
