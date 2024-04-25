@@ -218,33 +218,36 @@ function jumpTo(ts: number) {
   </p>
 
   <div class="controls">
-    <Transition mode="out-in">
-      <article
-        v-if="nextEvent"
-        :key="`${nextEvent.timestamp}${nextEvent.name}`"
-        class="event-card"
-        @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
-      >
-        <header>Upcoming:</header>
-        <div class="event-text">
-          <div>{{ nextEvent.name }}</div>
-          <div>{{ getFormattedTimeDiff(timeElapsed, stringToTimestamp(nextEvent.timestamp)) }}</div>
-        </div>
-      </article>
-    </Transition>
-    <Transition mode="out-in">
-      <article
-        v-if="currentEvent"
-        :key="`${currentEvent.timestamp}${currentEvent.name}`"
-        class="event-card"
-        @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
-      >
-        <header>Current:</header>
-        <div class="event-text">
-          <div>{{ currentEvent.name }}</div>
-        </div>
-      </article>
-    </Transition>
+    <div class="event-cards">
+      <Transition mode="out-in">
+        <article
+          v-if="nextEvent"
+          :aria-disabled="Boolean(senderId) || undefined"
+          :key="`${nextEvent.timestamp}${nextEvent.name}`"
+          class="event-card"
+          @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
+        >
+          <header>Upcoming in {{ getFormattedTimeDiff(timeElapsed, stringToTimestamp(nextEvent.timestamp)) }}:</header>
+          <div class="event-text">
+            <div>{{ nextEvent.name }}</div>
+          </div>
+        </article>
+      </Transition>
+      <Transition mode="out-in">
+        <article
+          v-if="currentEvent"
+          :aria-disabled="Boolean(senderId) || undefined"
+          :key="`${currentEvent.timestamp}${currentEvent.name}`"
+          class="event-card"
+          @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
+        >
+          <header>Current:</header>
+          <div class="event-text">
+            <div>{{ currentEvent.name }}</div>
+          </div>
+        </article>
+      </Transition>
+    </div>
 
     <div
       v-if="!senderId"
@@ -306,6 +309,7 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in futureItems"
             v-memo="[completedItems]"
+            :aria-disabled="Boolean(senderId) || undefined"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
@@ -330,6 +334,7 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in completedItems"
             v-memo="[completedItems]"
+            :aria-disabled="Boolean(senderId) || undefined"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
@@ -399,39 +404,48 @@ function jumpTo(ts: number) {
     }
   }
 
-  &:has(.next-event-card) {
+  &:has(.event-card) {
     justify-content: space-between;
   }
 
-  .event-card {
-    cursor: pointer;
+  .event-cards {
+    display: flex;
+    gap: 1rem;
 
-    &:hover:not(.v-enter-active, .v-leave-active) {
-      &,
-      & * {
-        background-color: color-mix(
-          in srgb,
-          var(--pico-contrast-background) 3%,
-          var(--pico-card-background-color) 100%
-        );
+    .event-card {
+      cursor: default;
+
+      &:not([aria-disabled]) {
+        cursor: pointer;
+
+        &:hover:not(.v-enter-active, .v-leave-active) {
+          &,
+          & * {
+            background-color: color-mix(
+              in srgb,
+              var(--pico-contrast-background) 3%,
+              var(--pico-card-background-color) 100%
+            );
+          }
+        }
       }
-    }
 
-    header {
-      text-align: center;
-      font-weight: bold;
-      margin-block-end: 0;
-      transition: inherit;
-    }
-
-    .event-text {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-
-      > * {
-        font-size: larger;
+      header {
         text-align: center;
+        font-weight: bold;
+        margin-block-end: 0;
+        transition: inherit;
+      }
+
+      .event-text {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+
+        > * {
+          font-size: larger;
+          text-align: center;
+        }
       }
     }
   }

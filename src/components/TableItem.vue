@@ -28,10 +28,14 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
 
 <style scoped lang="scss">
 .table-row {
-  cursor: pointer;
+  cursor: default;
 
-  &:hover {
-    background-color: var(--pico-table-row-stripped-background-color);
+  &:not([aria-disabled]) {
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--pico-table-row-stripped-background-color);
+    }
   }
 
   td {
@@ -43,7 +47,7 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
     background-color: green;
     color: white;
 
-    &:hover {
+    &:not([aria-disabled]):hover {
       background-color: color-mix(in srgb, green, var(--pico-table-row-stripped-background-color));
     }
   }
