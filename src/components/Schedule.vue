@@ -72,10 +72,7 @@ const foreignUrl = `${window.location.origin}?id=${id}`;
 const sendConn = ref<DataConnection[]>([]);
 const peer = new Peer(id, {
   config: {
-    iceServers: [
-      { urls: 'stun:freeturn.net:5349' },
-      { urls: 'turns:freeturn.tel:5349', username: 'free', credential: 'free' },
-    ],
+    iceServers: [{ urls: 'stun:74.125.142.127:19302' }], // stun.l.google.com - Firefox does not support DNS names
   },
 });
 peer.on('open', function () {
