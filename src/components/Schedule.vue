@@ -152,6 +152,7 @@ watchEffect(() => {
 
 const futureItems = computed(() => schedule.filter((item: ScheduleItem) => !completedItems.value.includes(item)));
 
+const currentEvent = computed(() => completedItems.value[0]);
 const nextEvent = computed(() => futureItems.value[0]);
 
 function pause() {
@@ -221,13 +222,26 @@ function jumpTo(ts: number) {
       <article
         v-if="nextEvent"
         :key="`${nextEvent.timestamp}${nextEvent.name}`"
-        class="next-event-card"
+        class="event-card"
         @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
       >
         <header>Upcoming:</header>
-        <div class="next-event-text">
+        <div class="event-text">
           <div>{{ nextEvent.name }}</div>
           <div>{{ getFormattedTimeDiff(timeElapsed, stringToTimestamp(nextEvent.timestamp)) }}</div>
+        </div>
+      </article>
+    </Transition>
+    <Transition mode="out-in">
+      <article
+        v-if="currentEvent"
+        :key="`${currentEvent.timestamp}${currentEvent.name}`"
+        class="event-card"
+        @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
+      >
+        <header>Current:</header>
+        <div class="event-text">
+          <div>{{ currentEvent.name }}</div>
         </div>
       </article>
     </Transition>
@@ -389,7 +403,7 @@ function jumpTo(ts: number) {
     justify-content: space-between;
   }
 
-  .next-event-card {
+  .event-card {
     cursor: pointer;
 
     &:hover:not(.v-enter-active, .v-leave-active) {
@@ -410,7 +424,7 @@ function jumpTo(ts: number) {
       transition: inherit;
     }
 
-    .next-event-text {
+    .event-text {
       display: flex;
       gap: 0.5rem;
       align-items: center;
