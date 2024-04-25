@@ -1,108 +1,56 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { type DataConnection, Peer } from 'peerjs';
+import QrcodeVue from 'qrcode.vue';
 
-interface PropsData {
-  startDate: number;
-  isPaused: boolean;
-  pausedTime: number;
-  pausedAtTimestamp: number;
-  pausedAtTimeElapsed: number;
-}
-
-const props = defineProps<{ data: PropsData }>();
-
-const emit = defineEmits<{
-  sync: [data: PropsData];
+defineProps<{
+  foreignUrl: string;
 }>();
 
-const foreignId = ref('');
+const dialog = ref<HTMLDialogElement | null>(null);
 
-const uniqueId = Date.now().toString().slice(-6);
-const peerId = `PenPixels${uniqueId}`;
+const close = () => dialog.value?.close();
+const open = () => dialog.value?.showModal();
 
-const type = ref('');
-
-let sendConn: DataConnection | null, recConn: DataConnection | null;
-const peer = new Peer(peerId);
-peer.on('open', function (id: string) {
-  console.log(`connected using id ${id}`);
-  console.log('Awaiting connection...');
-});
-
-function connect() {
-  sendConn = peer.connect(foreignId.value);
-  peer.on('connection', (c) => {
-    console.log('connected!');
-    recConn = c;
-
-    recConn?.on('data', function (data: any) {
-      console.log('Data received');
-      console.log(data);
-      emit('sync', data);
-    });
-  });
-
-  peer.on('disconnected', function () {
-    console.log('Connection lost. Please reconnect');
-
-    peer.reconnect();
-  });
-  peer.on('close', function () {
-    recConn = null;
-    sendConn = null;
-    console.log('Connection destroyed. Please refresh');
-  });
-  peer.on('error', function (err) {
-    console.error(err);
-  });
-}
-
-function sync() {
-  sendConn?.send(JSON.stringify(props.data));
-}
+const isLocal = ref(import.meta.env.DEV);
 </script>
 
 <template>
-  <div class="inputs">
-    <p>Your ID:</p>
-    <p>{{ peerId }}</p>
-    <input
-      v-model="foreignId"
-      placeholder="Connect to ID"
-      type="text"
-    />
-    <div>
-      <label for="send">
-        <input
-          v-model="type"
-          name="role"
-          type="radio"
-          value="send"
-          id="send"
+  <button @click="open">Connect Here</button>
+  <dialog
+    ref="dialog"
+    @click.self="close"
+  >
+    <article>
+      <header>
+        <span>Connect to this Instance</span>
+        <form method="dialog">
+          <button
+            aria-label="Close"
+            class="close"
+          ></button>
+        </form>
+      </header>
+      <div>
+        <a
+          v-if="isLocal"
+          :href="foreignUrl"
+          target="_blank"
+          >{{ foreignUrl }}</a
+        >
+        <QrcodeVue
+          v-else
+          :size="1000"
+          :value="foreignUrl"
+          class="qr-code"
         />
-        <span>Send</span>
-      </label>
-      <label for="receive">
-        <input
-          v-model="type"
-          name="role"
-          type="radio"
-          value="receive"
-          id="receive"
-        />
-        <span>Receive</span>
-      </label>
-    </div>
-    <button @click="connect">Connect</button>
-    <button @click="sync">Sync</button>
-  </div>
+      </div>
+    </article>
+  </dialog>
 </template>
 
-<style scoped lang="scss">
-.inputs {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+<style>
+.qr-code {
+  width: 100% !important;
+  height: auto !important;
 }
 </style>

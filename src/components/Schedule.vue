@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import rawSchedule from '@/assets/schedule.json';
 import { useTimestamp } from '@vueuse/core';
-import { computed, reactive, ref, watchEffect } from 'vue';
+import { computed, reactive, ref, watch, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
 import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 import PeerControls from './PeerControls.vue';
+import Peer, { type DataConnection } from 'peerjs';
+
+interface SyncData {
+  startDate: number;
+  isPaused: boolean;
+  pausedTime: number;
+  pausedAtTimestamp: number;
+  pausedAtTimeElapsed: number;
+}
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
 lengths.push('0:00');
@@ -33,13 +42,78 @@ const pausedTime = ref(0); // milliseconds
 const pausedAtTimestamp = ref(0); // unix timestamp
 const pausedAtTimeElapsed = ref(0); // milliseconds
 
-const data = reactive({
+const data: SyncData = reactive({
   startDate,
   isPaused,
   pausedTime,
   pausedAtTimestamp,
   pausedAtTimeElapsed,
 });
+
+function sync(syncData: SyncData) {
+  startDate.value = syncData.startDate;
+  isPaused.value = syncData.isPaused;
+  pausedTime.value = syncData.pausedTime;
+  pausedAtTimestamp.value = syncData.pausedAtTimestamp;
+  pausedAtTimeElapsed.value = syncData.pausedAtTimeElapsed;
+}
+
+const paramsString = window.location.search;
+const searchParams = new URLSearchParams(paramsString);
+const senderId = searchParams.get('id');
+
+const foreignUrl = ref('');
+
+let sendConn: DataConnection | null;
+const peer = new Peer();
+peer.on('open', function (id: string) {
+  foreignUrl.value = `${window.location.origin}?id=${id}`;
+
+  if (senderId) peer.connect(senderId);
+});
+
+peer.on('connection', (c) => {
+  if (!senderId) {
+    // this is for the sender
+    sendConn = peer.connect(c.peer);
+
+    sendConn.on('open', () => sendSync(data));
+  } else {
+    // this is for the receiver
+    c.on('data', (recData: unknown) => {
+      console.log(recData);
+      const isValidData = isSyncData(recData);
+      if (!isValidData) return;
+      sync(recData);
+    });
+  }
+});
+
+function isSyncData(syncData: unknown): syncData is SyncData {
+  const expectedDataKeys = Object.keys(data);
+  if (!syncData || typeof syncData !== 'object') return false;
+  const validKeys = Object.keys(syncData).filter((item: string) => expectedDataKeys.includes(item));
+  return validKeys.length === expectedDataKeys.length;
+}
+
+peer.on('disconnected', function () {
+  console.log('Connection lost. Please reconnect');
+
+  peer.reconnect();
+});
+peer.on('close', function () {
+  sendConn = null;
+  console.log('Connection destroyed. Please refresh');
+});
+peer.on('error', function (err) {
+  console.error(err);
+});
+
+function sendSync(syncData: SyncData) {
+  sendConn?.send(syncData);
+}
+
+watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime], () => sendSync(data));
 
 const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
 const timeElapsed = computed(() =>
@@ -93,6 +167,7 @@ function skip(seconds: number) {
 }
 
 function jumpTo(ts: number) {
+  if (senderId) return;
   const distanceToCurrent = ts - timeElapsed.value;
   startDate.value += distanceToCurrent * -1;
   if (!isPaused.value) return;
@@ -100,28 +175,12 @@ function jumpTo(ts: number) {
   pausedAtTimestamp.value = startDate.value + ts;
   pausedTime.value = 0;
 }
-
-interface SyncData {
-  startDate: number;
-  isPaused: boolean;
-  pausedTime: number;
-  pausedAtTimestamp: number;
-  pausedAtTimeElapsed: number;
-}
-function sync(stringData: string) {
-  const data: SyncData = JSON.parse(stringData);
-  startDate.value = data.startDate;
-  isPaused.value = data.isPaused;
-  pausedTime.value = data.pausedTime;
-  pausedAtTimestamp.value = data.pausedAtTimestamp;
-  pausedAtTimeElapsed.value = data.pausedAtTimeElapsed;
-}
 </script>
 
 <template>
   <PeerControls
-    :data
-    @sync="sync"
+    v-if="!senderId"
+    :foreign-url
   />
   <div
     :class="{ 'is-paused': isPaused, 'is-too-much': timeElapsedInSeconds > expectedLength }"
@@ -159,19 +218,22 @@ function sync(stringData: string) {
       </article>
     </Transition>
 
-    <div class="control-buttons">
+    <div
+      v-if="!senderId"
+      class="control-buttons"
+    >
       <button
-        :disabled="timeElapsedInSeconds < 10"
+        :disabled="timeElapsedInSeconds < 1"
         type="button"
-        @click="skip(10)"
+        @click="skip(1)"
       >
-        -10s
+        -1s
       </button>
       <button
         type="button"
-        @click="skip(-10)"
+        @click="skip(-1)"
       >
-        +10s
+        +1s
       </button>
       <button
         v-if="isPaused"
