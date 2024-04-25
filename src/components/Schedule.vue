@@ -111,7 +111,13 @@ peer.on('error', function (err) {
 onUnmounted(() => peer.destroy());
 
 function sendSync(syncData: SyncData) {
-  sendConn.value.forEach((conn) => conn.send(syncData));
+  sendConn.value.forEach((conn) => {
+    try {
+      conn.send(syncData);
+    } catch (e) {
+      console.error(e);
+    }
+  });
 }
 
 watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime], () => sendSync(data));
