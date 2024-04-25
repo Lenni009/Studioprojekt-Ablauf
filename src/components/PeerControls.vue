@@ -20,7 +20,7 @@ const open = () => dialog.value?.showModal();
     ref="dialog"
     @click.self="close"
   >
-    <article>
+    <article class="dialog-content">
       <header>
         <form method="dialog">
           <button
@@ -48,9 +48,15 @@ const open = () => dialog.value?.showModal();
   </dialog>
 </template>
 
-<style>
-.qr-code {
-  width: 100% !important;
-  height: auto !important;
+<style scoped lang="scss">
+.dialog-content {
+  max-height: 100svh;
+
+  .qr-code {
+    display: block;
+    margin-inline: auto;
+    width: min(100%, 100svh) !important;
+    height: auto !important;
+  }
 }
 </style>
