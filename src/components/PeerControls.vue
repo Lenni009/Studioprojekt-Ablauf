@@ -10,8 +10,6 @@ const dialog = ref<HTMLDialogElement | null>(null);
 
 const close = () => dialog.value?.close();
 const open = () => dialog.value?.showModal();
-
-const isLocal = ref(import.meta.env.DEV);
 </script>
 
 <template>
@@ -22,23 +20,23 @@ const isLocal = ref(import.meta.env.DEV);
   >
     <article>
       <header>
-        <span>Connect to this Instance</span>
         <form method="dialog">
           <button
             aria-label="Close"
             class="close"
           ></button>
         </form>
+        <p>Connect to this Instance</p>
       </header>
       <div>
-        <a
-          v-if="isLocal"
-          :href="foreignUrl"
-          target="_blank"
-          >{{ foreignUrl }}</a
-        >
+        <p>
+          <a
+            :href="foreignUrl"
+            target="_blank"
+            >{{ foreignUrl }}</a
+          >
+        </p>
         <QrcodeVue
-          v-else
           :size="1000"
           :value="foreignUrl"
           class="qr-code"
