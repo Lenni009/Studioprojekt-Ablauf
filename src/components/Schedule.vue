@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import rawSchedule from '@/assets/schedule.json';
 import { useTimestamp } from '@vueuse/core';
-import { computed, onUnmounted, reactive, ref, watch, watchEffect } from 'vue';
+import { computed, reactive, ref, watch, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
 import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
@@ -15,6 +15,11 @@ interface SyncData {
   pausedTime: number;
   pausedAtTimestamp: number;
   pausedAtTimeElapsed: number;
+}
+
+interface ConnObj {
+  id: number;
+  conn: DataConnection;
 }
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
@@ -69,10 +74,13 @@ const uniqueId = Date.now()
 const id = `PenPixels${uniqueId}`;
 const foreignUrl = `${window.location.origin}?id=${id}`;
 
-const sendConn = ref<DataConnection[]>([]);
+const noConnection = ref(false);
+
+let connId = 0;
+const sendConn = ref<ConnObj[]>([]);
 const peer = new Peer(id, {
   config: {
-    iceServers: [{ urls: 'stun:74.125.142.127:19302' }], // stun.l.google.com - Firefox does not support DNS names
+    iceServers: [{ urls: 'stun:74.125.250.129:19302' }], // stun.l.google.com - Firefox does not support DNS names
   },
 });
 peer.on('open', function () {
@@ -83,14 +91,34 @@ peer.on('connection', (c) => {
   if (!senderId) {
     // this is for the sender
     const conn = peer.connect(c.peer);
-    sendConn.value.push(conn);
+    const connObj: ConnObj = {
+      id: connId++,
+      conn,
+    };
+    sendConn.value.push(connObj);
     conn.on('open', () => sendSync(data));
+
+    conn.on('close', () => (sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id)));
+
+    addEventListener('beforeunload', () => {
+      sendConn.value.forEach(({ conn }) => conn.close());
+      peer.destroy();
+    });
   } else {
+    noConnection.value = false;
     // this is for the receiver
     c.on('data', (recData: unknown) => {
       const isValidData = isSyncData(recData);
       if (!isValidData) return;
       sync(recData);
+    });
+
+    c.on('close', () => (noConnection.value = true));
+
+    // clean up connections when tab is closed - This can be quirky on mobile, but doesn't impact functionality, see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#usage_notes
+    addEventListener('beforeunload', () => {
+      c.close();
+      peer.destroy();
     });
   }
 });
@@ -114,10 +142,8 @@ peer.on('error', function (err) {
   console.error(err);
 });
 
-onUnmounted(() => peer.destroy());
-
 function sendSync(syncData: SyncData) {
-  sendConn.value.forEach((conn) => {
+  sendConn.value.forEach(({ conn }) => {
     try {
       conn.send(syncData);
     } catch (e) {
@@ -192,6 +218,12 @@ function jumpTo(ts: number) {
 </script>
 
 <template>
+  <p
+    v-if="noConnection"
+    class="warning"
+  >
+    Connection lost, scan QR Code again!
+  </p>
   <PeerControls
     v-if="!senderId"
     :foreign-url
