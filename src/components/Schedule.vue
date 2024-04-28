@@ -8,6 +8,7 @@ import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 import PeerControls from './PeerControls.vue';
 import Peer, { type DataConnection } from 'peerjs';
+import { useToast } from 'vue-toastification';
 
 interface SyncData {
   startDate: number;
@@ -21,6 +22,8 @@ interface ConnObj {
   id: number;
   conn: DataConnection;
 }
+
+const toast = useToast();
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
 lengths.push('0:00');
@@ -74,8 +77,6 @@ const uniqueId = Date.now()
 const id = `PenPixels${uniqueId}`;
 const foreignUrl = `${window.location.origin}?id=${id}`;
 
-const noConnection = ref(false);
-
 let connId = 0;
 const sendConn = ref<ConnObj[]>([]);
 const peer = new Peer(id, {
@@ -89,6 +90,7 @@ peer.on('open', function () {
 
 peer.on('connection', (c) => {
   if (!senderId) {
+    toast.info('Client connected');
     // this is for the sender
     const conn = peer.connect(c.peer);
     const connObj: ConnObj = {
@@ -98,14 +100,17 @@ peer.on('connection', (c) => {
     sendConn.value.push(connObj);
     conn.on('open', () => sendSync(data));
 
-    conn.on('close', () => (sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id)));
+    conn.on('close', () => {
+      sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id);
+      toast.info('Client disconnected');
+    });
 
     addEventListener('beforeunload', () => {
       sendConn.value.forEach(({ conn }) => conn.close());
       peer.destroy();
     });
   } else {
-    noConnection.value = false;
+    toast.success('Connected!');
     // this is for the receiver
     c.on('data', (recData: unknown) => {
       const isValidData = isSyncData(recData);
@@ -113,7 +118,7 @@ peer.on('connection', (c) => {
       sync(recData);
     });
 
-    c.on('close', () => (noConnection.value = true));
+    c.on('close', () => toast.error('Connection lost!'));
 
     // clean up connections when tab is closed - This can be quirky on mobile, but doesn't impact functionality, see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#usage_notes
     addEventListener('beforeunload', () => {
@@ -130,17 +135,15 @@ function isSyncData(syncData: unknown): syncData is SyncData {
   return validKeys.length === expectedDataKeys.length;
 }
 
-peer.on('disconnected', function () {
-  console.log('Connection lost. Please reconnect');
+peer.on('disconnected', () => {
+  toast.warning('Connection lost. Trying to reconnect...');
   peer.reconnect();
 });
-peer.on('close', function () {
+peer.on('close', () => {
   sendConn.value = [];
-  console.log('Connection destroyed. Please refresh');
+  toast.error('Connection destroyed!');
 });
-peer.on('error', function (err) {
-  console.error(err);
-});
+peer.on('error', () => toast.error('An error occurred, connection lost!'));
 
 function sendSync(syncData: SyncData) {
   sendConn.value.forEach(({ conn }) => {
@@ -218,12 +221,6 @@ function jumpTo(ts: number) {
 </script>
 
 <template>
-  <p
-    v-if="noConnection"
-    class="warning"
-  >
-    Connection lost, scan QR Code again!
-  </p>
   <PeerControls
     v-if="!senderId"
     :foreign-url
