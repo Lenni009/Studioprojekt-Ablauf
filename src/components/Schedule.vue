@@ -270,6 +270,7 @@ function jumpTo(ts: number) {
     <span
       v-if="isLive && timeDiff && !isPaused"
       :class="timeDiff > 0 ? 'ahead' : 'behind'"
+      class="time-diff"
       >({{ timeDiff > 0 ? '+' : '' }}{{ timeDiff !== 0 ? timeDiff : '' }}s)</span
     >
   </div>
@@ -425,14 +426,6 @@ function jumpTo(ts: number) {
   gap: 1rem;
 }
 
-.ahead {
-  color: green;
-}
-
-.behind {
-  color: red;
-}
-
 .warning {
   background-color: red;
   color: white;
@@ -541,7 +534,20 @@ function jumpTo(ts: number) {
   font-size: 4rem;
   display: flex;
   justify-content: center;
+  align-items: baseline;
   gap: 1rem;
+
+  .time-diff {
+    font-size: 2.5rem;
+
+    &.ahead {
+      color: green;
+    }
+
+    &.behind {
+      color: red;
+    }
+  }
 
   &.is-paused {
     background-color: tomato;
