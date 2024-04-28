@@ -7,11 +7,14 @@ import TableItem from './TableItem.vue';
 import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 import PeerControls from './PeerControls.vue';
+import LiveModeToggle from './LiveModeToggle.vue';
 import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
 
 interface SyncData {
   startDate: number;
+  liveStartDate: number;
+  isLive: boolean;
   isPaused: boolean;
   pausedTime: number;
   pausedAtTimestamp: number;
@@ -43,6 +46,7 @@ schedule.push({
   timestamp: timestampToString(timestamps.at(-1)),
 });
 
+const liveStartDate = ref(0); // unix timestamp
 const startDate = ref(Date.now()); // unix timestamp
 
 const isPaused = ref(false);
@@ -50,8 +54,22 @@ const pausedTime = ref(0); // milliseconds
 const pausedAtTimestamp = ref(0); // unix timestamp
 const pausedAtTimeElapsed = ref(0); // milliseconds
 
+const isLive = ref(false);
+
+watch(
+  isLive,
+  (newVal) => {
+    if (!newVal) return;
+    pause();
+    reset();
+  },
+  { immediate: true }
+);
+
 const data: SyncData = reactive({
   startDate,
+  liveStartDate,
+  isLive,
   isPaused,
   pausedTime,
   pausedAtTimestamp,
@@ -60,6 +78,8 @@ const data: SyncData = reactive({
 
 function sync(syncData: SyncData) {
   startDate.value = syncData.startDate;
+  liveStartDate.value = syncData.liveStartDate;
+  isLive.value = syncData.isLive;
   isPaused.value = syncData.isPaused;
   pausedTime.value = syncData.pausedTime;
   pausedAtTimestamp.value = syncData.pausedAtTimestamp;
@@ -84,7 +104,7 @@ const peer = new Peer(id, {
     iceServers: [{ urls: 'stun:74.125.250.129:19302' }], // stun.l.google.com - Firefox does not support DNS names
   },
 });
-peer.on('open', function () {
+peer.on('open', () => {
   if (senderId) peer.connect(senderId);
 });
 
@@ -155,13 +175,17 @@ function sendSync(syncData: SyncData) {
   });
 }
 
-watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime], () => sendSync(data));
+watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
+  sendSync(data)
+);
 
 const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
 const timeElapsed = computed(() =>
   isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
 );
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
+const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
+const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
 const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
 
 // Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
@@ -191,8 +215,10 @@ function pause() {
 }
 
 function resume() {
+  const currentTimestamp = Date.now();
   isPaused.value = false;
-  pausedTime.value += Date.now() - pausedAtTimestamp.value;
+  pausedTime.value += currentTimestamp - pausedAtTimestamp.value;
+  liveStartDate.value = currentTimestamp - pausedAtTimeElapsed.value;
 }
 
 function reset() {
@@ -221,16 +247,31 @@ function jumpTo(ts: number) {
 </script>
 
 <template>
-  <PeerControls
-    v-if="!senderId"
-    :foreign-url
-    :connected-clients="sendConn.length"
-  />
   <div
-    :class="{ 'is-paused': isPaused, 'is-too-much': timeElapsedInSeconds > expectedLength }"
+    v-if="!senderId"
+    class="controls-header"
+  >
+    <div>
+      <PeerControls
+        :connected-clients="sendConn.length"
+        :foreign-url
+      />
+    </div>
+    <div>
+      <LiveModeToggle v-model="isLive" />
+    </div>
+  </div>
+
+  <div
+    :class="{ 'is-paused': isPaused }"
     class="timer"
   >
-    {{ formattedTime }}
+    <span :class="{ 'is-too-much': timeElapsedInSeconds > expectedLength }">{{ formattedTime }}</span>
+    <span
+      v-if="isLive && timeDiff && !isPaused"
+      :class="timeDiff > 0 ? 'ahead' : 'behind'"
+      >({{ timeDiff > 0 ? '+' : '' }}{{ timeDiff !== 0 ? timeDiff : '' }}s)</span
+    >
   </div>
 
   <progress
@@ -300,16 +341,17 @@ function jumpTo(ts: number) {
         type="button"
         @click="resume"
       >
-        Resume
+        {{ isLive ? 'Start' : 'Resume' }}
       </button>
       <button
-        v-else
+        v-else-if="!isLive"
         type="button"
         @click="pause"
       >
         Pause
       </button>
       <button
+        v-if="!isLive"
         class="secondary"
         type="button"
         @click="reset"
@@ -376,6 +418,21 @@ function jumpTo(ts: number) {
 </template>
 
 <style scoped lang="scss">
+.controls-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ahead {
+  color: green;
+}
+
+.behind {
+  color: red;
+}
+
 .warning {
   background-color: red;
   color: white;
@@ -482,7 +539,9 @@ function jumpTo(ts: number) {
 
 .timer {
   font-size: 4rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 
   &.is-paused {
     background-color: tomato;
