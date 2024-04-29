@@ -7,6 +7,7 @@ import TableItem from './TableItem.vue';
 import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
 import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
 import PeerControls from './PeerControls.vue';
+import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
 import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
@@ -260,6 +261,10 @@ function jumpTo(ts: number) {
     </div>
     <div>
       <LiveModeToggle v-model="isLive" />
+      <CodeConnector
+        v-if="!sendConn.length"
+        :id-length="uniquenessPrecision"
+      />
     </div>
   </div>
 
@@ -360,6 +365,9 @@ function jumpTo(ts: number) {
       >
         Reset
       </button>
+    </div>
+    <div v-else>
+      <CodeConnector :id-length="uniquenessPrecision" />
     </div>
   </div>
 
