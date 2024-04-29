@@ -553,7 +553,7 @@ function jumpTo(ts: number) {
     background-color: tomato;
   }
 
-  &.is-too-much {
+  .is-too-much {
     color: crimson;
   }
 }
