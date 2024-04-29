@@ -33,7 +33,7 @@ jobs:
           sharepoint_password: ${{ secrets.SHAREPOINT_PWD }}
 
       - name: Convert XLSX to CSV
-        uses: JoeSiu/xlsx-to-csv-action@1.0.0
+        uses: JoeSiu/xlsx-to-csv-action@1.0.0 # This should stay at @1.0.0, since the @v1.0.3 version broke the entire pipeline
         with:
           inputFile: './download/Sendeablauf.xlsx'
           filter: '{ "Länge": "Length", "Kürzel": "Code", "Kapitel": "Chapter" }'
