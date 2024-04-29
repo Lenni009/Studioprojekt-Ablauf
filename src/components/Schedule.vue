@@ -98,15 +98,18 @@ function sync(syncData: SyncData) {
   pausedAtTimestamp.value = currentTimestamp - syncData.pausedAtTimeElapsed;
 }
 
+const uniqueString = 'PenPixels';
+const uniquenessPrecision = 4; // defines how many "random" numbers should be appended to the id
+
 const paramsString = window.location.search;
 const searchParams = new URLSearchParams(paramsString);
-const senderId = searchParams.get('id');
+const paramsId = searchParams.get('id');
+const senderId = paramsId?.length === uniquenessPrecision ? `${uniqueString}${paramsId}` : paramsId;
 
-const uniquenessPrecision = 4; // defines how many "random" numbers should be appended to the id
 const uniqueId = Date.now()
   .toString()
   .slice(uniquenessPrecision * -1);
-const id = `PenPixels${uniqueId}`;
+const id = `${uniqueString}${uniqueId}`;
 const foreignUrl = `${window.location.origin}?id=${id}`;
 
 let connId = 0;
