@@ -65,6 +65,28 @@ watch(
   { immediate: true }
 );
 
+const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
+const timeElapsed = computed(() =>
+  isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
+);
+const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
+const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
+const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
+const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
+
+const data: SyncData = reactive({
+  timeElapsed,
+  actualTimeElapsed,
+  isLive,
+  isPaused,
+  pausedTime,
+  pausedAtTimeElapsed,
+});
+
+watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
+  sendSync(data)
+);
+
 function sync(syncData: SyncData) {
   const currentTimestamp = Date.now();
   startDate.value = currentTimestamp - syncData.timeElapsed;
@@ -166,28 +188,6 @@ function sendSync(syncData: SyncData) {
     }
   });
 }
-
-watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
-  sendSync(data)
-);
-
-const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
-const timeElapsed = computed(() =>
-  isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
-);
-const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
-const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
-const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
-const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
-
-const data: SyncData = reactive({
-  timeElapsed,
-  actualTimeElapsed,
-  isLive,
-  isPaused,
-  pausedTime,
-  pausedAtTimeElapsed,
-});
 
 // Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
 const completedItems = ref<ScheduleItem[]>([]);
