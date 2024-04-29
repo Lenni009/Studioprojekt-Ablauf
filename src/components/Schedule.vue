@@ -12,12 +12,11 @@ import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
 
 interface SyncData {
-  startDate: number;
-  liveStartDate: number;
+  timeElapsed: number;
+  actualTimeElapsed: number;
   isLive: boolean;
   isPaused: boolean;
   pausedTime: number;
-  pausedAtTimestamp: number;
   pausedAtTimeElapsed: number;
 }
 
@@ -66,24 +65,36 @@ watch(
   { immediate: true }
 );
 
+const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
+const timeElapsed = computed(() =>
+  isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
+);
+const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
+const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
+const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
+const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
+
 const data: SyncData = reactive({
-  startDate,
-  liveStartDate,
+  timeElapsed,
+  actualTimeElapsed,
   isLive,
   isPaused,
   pausedTime,
-  pausedAtTimestamp,
   pausedAtTimeElapsed,
 });
 
+watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
+  sendSync(data)
+);
+
 function sync(syncData: SyncData) {
-  startDate.value = syncData.startDate;
-  liveStartDate.value = syncData.liveStartDate;
+  const currentTimestamp = Date.now();
+  startDate.value = currentTimestamp - syncData.timeElapsed;
+  liveStartDate.value = currentTimestamp - syncData.actualTimeElapsed;
   isLive.value = syncData.isLive;
   isPaused.value = syncData.isPaused;
-  pausedTime.value = syncData.pausedTime;
-  pausedAtTimestamp.value = syncData.pausedAtTimestamp;
   pausedAtTimeElapsed.value = syncData.pausedAtTimeElapsed;
+  pausedAtTimestamp.value = currentTimestamp - syncData.pausedAtTimeElapsed;
 }
 
 const paramsString = window.location.search;
@@ -164,7 +175,7 @@ peer.on('close', () => {
   toast.error('Connection destroyed!');
 });
 peer.on('error', (e) => {
-  console.log(e)
+  console.log(e);
   toast.error('An error occurred, connection lost!');
 });
 
@@ -177,19 +188,6 @@ function sendSync(syncData: SyncData) {
     }
   });
 }
-
-watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
-  sendSync(data)
-);
-
-const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
-const timeElapsed = computed(() =>
-  isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
-);
-const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
-const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
-const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
-const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
 
 // Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
 const completedItems = ref<ScheduleItem[]>([]);
