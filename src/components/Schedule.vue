@@ -163,7 +163,10 @@ peer.on('close', () => {
   sendConn.value = [];
   toast.error('Connection destroyed!');
 });
-peer.on('error', () => toast.error('An error occurred, connection lost!'));
+peer.on('error', (e) => {
+  console.log(e)
+  toast.error('An error occurred, connection lost!');
+});
 
 function sendSync(syncData: SyncData) {
   sendConn.value.forEach(({ conn }) => {
