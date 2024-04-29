@@ -11,6 +11,7 @@ import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
 import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
+import { uniqueString, uniquenessPrecision, id } from '@/variables/id';
 
 interface SyncData {
   timeElapsed: number;
@@ -98,19 +99,10 @@ function sync(syncData: SyncData) {
   pausedAtTimestamp.value = currentTimestamp - syncData.pausedAtTimeElapsed;
 }
 
-const uniqueString = 'PenPixels';
-const uniquenessPrecision = 4; // defines how many "random" numbers should be appended to the id
-
 const paramsString = window.location.search;
 const searchParams = new URLSearchParams(paramsString);
 const paramsId = searchParams.get('id');
 const senderId = paramsId?.length === uniquenessPrecision ? `${uniqueString}${paramsId}` : paramsId;
-
-const uniqueId = Date.now()
-  .toString()
-  .slice(uniquenessPrecision * -1);
-const id = `${uniqueString}${uniqueId}`;
-const foreignUrl = `${window.location.origin}?id=${id}`;
 
 let connId = 0;
 const sendConn = ref<ConnObj[]>([]);
@@ -257,17 +249,11 @@ function jumpTo(ts: number) {
     class="controls-header"
   >
     <div>
-      <PeerControls
-        :connected-clients="sendConn.length"
-        :foreign-url
-      />
+      <PeerControls :connected-clients="sendConn.length" />
     </div>
     <div>
       <LiveModeToggle v-model="isLive" />
-      <CodeConnector
-        v-if="!sendConn.length"
-        :id-length="uniquenessPrecision"
-      />
+      <CodeConnector v-if="!sendConn.length" />
     </div>
   </div>
 
