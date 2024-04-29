@@ -33,7 +33,7 @@ jobs:
           sharepoint_password: ${{ secrets.SHAREPOINT_PWD }}
 
       - name: Convert XLSX to CSV
-        uses: JoeSiu/xlsx-to-csv-action@1.0.0
+        uses: JoeSiu/xlsx-to-csv-action@v1.0.3
         with:
           inputFile: './download/Sendeablauf.xlsx'
           filter: '{ "Länge": "Length", "Kürzel": "Code", "Kapitel": "Chapter" }'
