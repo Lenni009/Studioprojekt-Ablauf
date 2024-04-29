@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { foreignUrl, uniqueId } from '@/variables/id';
 import QrcodeVue from 'qrcode.vue';
 
 defineProps<{
-  foreignUrl: string;
   connectedClients: number;
 }>();
 
@@ -28,7 +28,7 @@ const open = () => dialog.value?.showModal();
             class="close"
           ></button>
         </form>
-        <p>Connect to this Instance</p>
+        <p>Connect to this Instance ID: {{ uniqueId }}</p>
       </header>
       <div>
         <p>

@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-
-const props = defineProps<{
-  idLength: number;
-}>();
+import { uniquenessPrecision as idLength } from '@/variables/id';
 
 const id = ref('');
 const dialog = ref<HTMLDialogElement | null>(null);
 const link = computed(() => `${window.location.origin}?id=${id.value}`);
 
-const isIdValid = computed(() => id.value.length === props.idLength);
+const isIdValid = computed(() => id.value.length === idLength);
 
 const open = () => dialog.value?.showModal();
 const close = () => dialog.value?.close();
@@ -35,12 +32,13 @@ const close = () => dialog.value?.close();
         <fieldset role="group">
           <input
             v-model="id"
-            name="id"
             :minlength="idLength"
             :maxlength="idLength"
+            name="id"
             pattern="[0-9]{4}"
             placeholder="0000"
             type="text"
+            autofocus
           />
           <a
             :aria-disabled="!isIdValid"
