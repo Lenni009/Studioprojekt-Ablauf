@@ -15,7 +15,7 @@ const open = () => dialog.value?.showModal();
 
 <template>
   <button @click="open">Connect Here</button>
-  <p>Connected: {{ connectedClients }}</p>
+  <p class="counter">Connected: {{ connectedClients }}</p>
   <dialog
     ref="dialog"
     @click.self="close"
@@ -49,6 +49,10 @@ const open = () => dialog.value?.showModal();
 </template>
 
 <style scoped lang="scss">
+.counter {
+  margin: 0;
+}
+
 .dialog-content {
   max-height: 100svh;
 
