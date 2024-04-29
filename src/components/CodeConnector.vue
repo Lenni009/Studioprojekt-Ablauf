@@ -32,12 +32,13 @@ const close = () => dialog.value?.close();
         <fieldset role="group">
           <input
             v-model="id"
-            name="id"
             :minlength="idLength"
             :maxlength="idLength"
+            name="id"
             pattern="[0-9]{4}"
             placeholder="0000"
             type="text"
+            autofocus
           />
           <a
             :aria-disabled="!isIdValid"
