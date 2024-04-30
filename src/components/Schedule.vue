@@ -75,6 +75,7 @@ const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
 const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
 const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
 const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
+const formattedActualTime = computed(() => timestampToString(actualTimeElapsed.value)); // '1:23' time format string
 
 const data: SyncData = reactive({
   timeElapsed,
@@ -222,6 +223,7 @@ function reset() {
   const currentTimestamp = Date.now();
   pausedTime.value = 0;
   startDate.value = currentTimestamp;
+  liveStartDate.value = currentTimestamp;
   pausedAtTimeElapsed.value = 0;
   pausedAtTimestamp.value = currentTimestamp;
 }
@@ -261,7 +263,9 @@ function jumpTo(ts: number) {
     :class="{ 'is-paused': isPaused }"
     class="timer"
   >
-    <span :class="{ 'is-too-much': timeElapsedInSeconds > expectedLength }">{{ formattedTime }}</span>
+    <span :class="{ 'is-too-much': timeElapsedInSeconds > expectedLength }">{{
+      isLive && !isPaused ? formattedActualTime : formattedTime
+    }}</span>
     <span
       v-if="isLive && timeDiff && !isPaused"
       :class="timeDiff > 0 ? 'ahead' : 'behind'"
