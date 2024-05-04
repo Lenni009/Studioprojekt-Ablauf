@@ -11,7 +11,7 @@ import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
 import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
-import { uniqueString, uniquenessPrecision, id, currentYear } from '@/variables/id';
+import { uniqueString, id, currentYear } from '@/variables/id';
 
 interface SyncData {
   timeElapsed: number;
@@ -113,12 +113,13 @@ const peer = new Peer(id, {
   },
 });
 peer.on('open', () => {
+  toast.info('Connected to Server');
   if (paramsId) peer.connect(senderId);
 });
 
 peer.on('connection', (c) => {
   if (!paramsId) {
-    toast.info('Client connected');
+    toast.info('Connection established');
     // this is for the sender
     const conn = peer.connect(c.peer);
     const connObj: ConnObj = {
@@ -126,7 +127,10 @@ peer.on('connection', (c) => {
       conn,
     };
     sendConn.value.push(connObj);
-    conn.on('open', () => sendSync(data));
+    conn.on('open', () => {
+      toast.info('Client connected');
+      sendSync(data);
+    });
 
     conn.on('close', () => {
       sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id);
@@ -142,8 +146,7 @@ peer.on('connection', (c) => {
     // this is for the receiver
     c.on('data', (recData: unknown) => {
       const isValidData = isSyncData(recData);
-      if (!isValidData) return;
-      sync(recData);
+      if (isValidData) sync(recData);
     });
 
     c.on('close', () => toast.error('Connection lost!'));
@@ -360,7 +363,7 @@ function jumpTo(ts: number) {
       </button>
     </div>
     <div v-else>
-      <CodeConnector :id-length="uniquenessPrecision" />
+      <CodeConnector />
     </div>
   </div>
 
