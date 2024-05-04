@@ -173,7 +173,7 @@ peer.on('close', () => {
 });
 peer.on('error', (e) => {
   console.log(e);
-  toast.error('An error occurred, connection lost!');
+  toast.error(`An error occurred, connection lost: ${e.type}`);
 });
 
 function sendSync(syncData: SyncData) {
