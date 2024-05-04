@@ -11,7 +11,7 @@ import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
 import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
-import { uniqueString, uniquenessPrecision, id } from '@/variables/id';
+import { uniqueString, uniquenessPrecision, id, currentYear } from '@/variables/id';
 
 interface SyncData {
   timeElapsed: number;
@@ -103,7 +103,7 @@ function sync(syncData: SyncData) {
 const paramsString = window.location.search;
 const searchParams = new URLSearchParams(paramsString);
 const paramsId = searchParams.get('id');
-const senderId = paramsId?.length === uniquenessPrecision ? `${uniqueString}${paramsId}` : paramsId;
+const senderId = `${uniqueString}${currentYear}${paramsId}`;
 
 let connId = 0;
 const sendConn = ref<ConnObj[]>([]);
@@ -113,11 +113,11 @@ const peer = new Peer(id, {
   },
 });
 peer.on('open', () => {
-  if (senderId) peer.connect(senderId);
+  if (paramsId) peer.connect(senderId);
 });
 
 peer.on('connection', (c) => {
-  if (!senderId) {
+  if (!paramsId) {
     toast.info('Client connected');
     // this is for the sender
     const conn = peer.connect(c.peer);
@@ -235,7 +235,7 @@ function skip(seconds: number) {
 }
 
 function jumpTo(ts: number) {
-  if (senderId) return;
+  if (paramsId) return;
   const distanceToCurrent = ts - timeElapsed.value;
   startDate.value += distanceToCurrent * -1;
   if (!isPaused.value) return;
@@ -247,7 +247,7 @@ function jumpTo(ts: number) {
 
 <template>
   <div
-    v-if="!senderId"
+    v-if="!paramsId"
     class="controls-header"
   >
     <div>
@@ -292,7 +292,7 @@ function jumpTo(ts: number) {
       <Transition mode="out-in">
         <article
           v-if="nextEvent"
-          :aria-disabled="Boolean(senderId) || undefined"
+          :aria-disabled="Boolean(paramsId) || undefined"
           :key="`${nextEvent.timestamp}${nextEvent.name}`"
           class="event-card"
           @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
@@ -306,7 +306,7 @@ function jumpTo(ts: number) {
       <Transition mode="out-in">
         <article
           v-if="currentEvent"
-          :aria-disabled="Boolean(senderId) || undefined"
+          :aria-disabled="Boolean(paramsId) || undefined"
           :key="`${currentEvent.timestamp}${currentEvent.name}`"
           class="event-card"
           @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
@@ -320,7 +320,7 @@ function jumpTo(ts: number) {
     </div>
 
     <div
-      v-if="!senderId"
+      v-if="!paramsId"
       class="control-buttons"
     >
       <button
@@ -383,7 +383,7 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in futureItems"
             v-memo="[completedItems]"
-            :aria-disabled="Boolean(senderId) || undefined"
+            :aria-disabled="Boolean(paramsId) || undefined"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
@@ -408,7 +408,7 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in completedItems"
             v-memo="[completedItems]"
-            :aria-disabled="Boolean(senderId) || undefined"
+            :aria-disabled="Boolean(paramsId) || undefined"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
