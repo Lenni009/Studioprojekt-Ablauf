@@ -11,7 +11,7 @@ import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
 import Peer, { type DataConnection } from 'peerjs';
 import { useToast } from 'vue-toastification';
-import { uniqueString, uniquenessPrecision, id } from '@/variables/id';
+import { uniqueString, id, currentYear } from '@/variables/id';
 
 interface SyncData {
   timeElapsed: number;
@@ -103,7 +103,7 @@ function sync(syncData: SyncData) {
 const paramsString = window.location.search;
 const searchParams = new URLSearchParams(paramsString);
 const paramsId = searchParams.get('id');
-const senderId = paramsId?.length === uniquenessPrecision ? `${uniqueString}${paramsId}` : paramsId;
+const senderId = `${uniqueString}${currentYear}${paramsId}`;
 
 let connId = 0;
 const sendConn = ref<ConnObj[]>([]);
@@ -113,12 +113,13 @@ const peer = new Peer(id, {
   },
 });
 peer.on('open', () => {
-  if (senderId) peer.connect(senderId);
+  toast.info('Connected to Server');
+  if (paramsId) peer.connect(senderId);
 });
 
 peer.on('connection', (c) => {
-  if (!senderId) {
-    toast.info('Client connected');
+  if (!paramsId) {
+    toast.info('Connection established');
     // this is for the sender
     const conn = peer.connect(c.peer);
     const connObj: ConnObj = {
@@ -126,7 +127,10 @@ peer.on('connection', (c) => {
       conn,
     };
     sendConn.value.push(connObj);
-    conn.on('open', () => sendSync(data));
+    conn.on('open', () => {
+      toast.info('Client connected');
+      sendSync(data);
+    });
 
     conn.on('close', () => {
       sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id);
@@ -142,8 +146,7 @@ peer.on('connection', (c) => {
     // this is for the receiver
     c.on('data', (recData: unknown) => {
       const isValidData = isSyncData(recData);
-      if (!isValidData) return;
-      sync(recData);
+      if (isValidData) sync(recData);
     });
 
     c.on('close', () => toast.error('Connection lost!'));
@@ -173,7 +176,7 @@ peer.on('close', () => {
 });
 peer.on('error', (e) => {
   console.log(e);
-  toast.error('An error occurred, connection lost!');
+  toast.error(`An error occurred, connection lost: ${e.type}`);
 });
 
 function sendSync(syncData: SyncData) {
@@ -235,7 +238,7 @@ function skip(seconds: number) {
 }
 
 function jumpTo(ts: number) {
-  if (senderId) return;
+  if (paramsId) return;
   const distanceToCurrent = ts - timeElapsed.value;
   startDate.value += distanceToCurrent * -1;
   if (!isPaused.value) return;
@@ -247,7 +250,7 @@ function jumpTo(ts: number) {
 
 <template>
   <div
-    v-if="!senderId"
+    v-if="!paramsId"
     class="controls-header"
   >
     <div>
@@ -292,7 +295,7 @@ function jumpTo(ts: number) {
       <Transition mode="out-in">
         <article
           v-if="nextEvent"
-          :aria-disabled="Boolean(senderId) || undefined"
+          :aria-disabled="Boolean(paramsId) || undefined"
           :key="`${nextEvent.timestamp}${nextEvent.name}`"
           class="event-card"
           @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
@@ -306,7 +309,7 @@ function jumpTo(ts: number) {
       <Transition mode="out-in">
         <article
           v-if="currentEvent"
-          :aria-disabled="Boolean(senderId) || undefined"
+          :aria-disabled="Boolean(paramsId) || undefined"
           :key="`${currentEvent.timestamp}${currentEvent.name}`"
           class="event-card"
           @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
@@ -320,7 +323,7 @@ function jumpTo(ts: number) {
     </div>
 
     <div
-      v-if="!senderId"
+      v-if="!paramsId"
       class="control-buttons"
     >
       <button
@@ -360,7 +363,7 @@ function jumpTo(ts: number) {
       </button>
     </div>
     <div v-else>
-      <CodeConnector :id-length="uniquenessPrecision" />
+      <CodeConnector />
     </div>
   </div>
 
@@ -383,7 +386,7 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in futureItems"
             v-memo="[completedItems]"
-            :aria-disabled="Boolean(senderId) || undefined"
+            :aria-disabled="Boolean(paramsId) || undefined"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
@@ -408,7 +411,7 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in completedItems"
             v-memo="[completedItems]"
-            :aria-disabled="Boolean(senderId) || undefined"
+            :aria-disabled="Boolean(paramsId) || undefined"
             :data="item"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"

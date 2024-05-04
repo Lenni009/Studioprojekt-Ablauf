@@ -1,5 +1,15 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import Schedule from './components/Schedule.vue';
+
+onMounted(async () => {
+  try {
+    await navigator.wakeLock.request('screen');
+  } catch (err) {
+    // the wake lock request fails - usually system related, such being low on battery
+    console.log(`${err.name}, ${err.message}`);
+  }
+});
 </script>
 
 <template>
