@@ -5,4 +5,4 @@ const currentTimestamp = Date.now();
 export const currentYear = new Date(currentTimestamp).getUTCFullYear().toString();
 export const uniqueId = currentTimestamp.toString().slice(uniquenessPrecision * -1);
 export const id = `${uniqueString}${currentYear}${uniqueId}`;
-export const foreignUrl = `${window.location.origin}?id=${id}`;
+export const foreignUrl = `${window.location.origin}?id=${uniqueId}`;
