@@ -73,6 +73,7 @@ const timeElapsed = computed(() =>
 );
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
 const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
+const actualTimeElapsedInSeconds = computed(() => actualTimeElapsed.value / 1000);
 const timeDiff = computed(() => Math.floor((timeElapsed.value - actualTimeElapsed.value) / 1000));
 const formattedTime = computed(() => timestampToString(timeElapsed.value)); // '1:23' time format string
 const formattedActualTime = computed(() => timestampToString(actualTimeElapsed.value)); // '1:23' time format string
@@ -233,8 +234,8 @@ function reset() {
 
 function skip(seconds: number) {
   const milliseconds = seconds * 1000;
-  startDate.value += milliseconds;
-  pausedAtTimeElapsed.value += milliseconds * -1;
+  startDate.value += milliseconds * -1;
+  pausedAtTimeElapsed.value += milliseconds;
 }
 
 function jumpTo(ts: number) {
@@ -266,9 +267,13 @@ function jumpTo(ts: number) {
     :class="{ 'is-paused': isPaused }"
     class="timer"
   >
-    <span :class="{ 'is-too-much': timeElapsedInSeconds > expectedLength }">{{
-      isLive && !isPaused ? formattedActualTime : formattedTime
-    }}</span>
+    <span
+      :class="{
+        'is-too-much':
+          Math.floor(isLive && !isPaused ? actualTimeElapsedInSeconds : timeElapsedInSeconds) > expectedLength,
+      }"
+      >{{ isLive && !isPaused ? formattedActualTime : formattedTime }}</span
+    >
     <span
       v-if="isLive && timeDiff && !isPaused"
       :class="timeDiff > 0 ? 'ahead' : 'behind'"
@@ -279,7 +284,7 @@ function jumpTo(ts: number) {
 
   <progress
     :max="expectedLength"
-    :value="timeElapsedInSeconds"
+    :value="isLive && !isPaused ? actualTimeElapsedInSeconds : timeElapsedInSeconds"
     class="progress"
   ></progress>
 
@@ -329,13 +334,13 @@ function jumpTo(ts: number) {
       <button
         :disabled="timeElapsedInSeconds < 1"
         type="button"
-        @click="skip(1)"
+        @click="skip(-1)"
       >
         -1s
       </button>
       <button
         type="button"
-        @click="skip(-1)"
+        @click="skip(1)"
       >
         +1s
       </button>
