@@ -16,7 +16,7 @@
     "sass": "^1.74.1",
     "typescript": "^5.4.4",
     "vite": "^5.2.8",
-    "vue": "^3.4.25"
+    "vue": "^3.4.26"
   },
   "dependencies": {
     "@picocss/pico": "^2.0.6",
