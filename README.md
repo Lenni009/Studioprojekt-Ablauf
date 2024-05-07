@@ -58,6 +58,8 @@ Da die App ihre Daten von einer Excel Tabelle zieht, ist sie ziemlich flexibel u
 
 Jedoch sollte man trotzdem ein bisschen von Programmierung verstehen, wenn man die App für andere Projekte verwenden will.
 
+### Source Code
+
 Die URL für SharePoint muss in `.github/workflows/getSchedule.yml` angepasst werden. Die Datei sollte idealerweise `Sendeablauf.xlsx` heißen, andernfalls muss das ebenfalls angepasst werden.
 
 Die Zugangsdaten für Sharepoint werden in den GitHub Repository Secrets gespeichert, unter den Namen `SHAREPOINT_USN` (Benutzername) und `SHAREPOINT_PWD` (Passwort).
@@ -67,6 +69,34 @@ Die `.xlsx` Datei auf Sharepoint muss die Spalten `Länge`, `Kürzel` und `Kapit
 Die Zeitstempel der Abschnitte werden basierend auf der `Länge` berechnet. Jede Zeile sollte dementsprechend eine Länge haben, es dürfen keine mehrzeiligen Zellen genutzt werden.
 
 Die erwartete Länge der Sendung kann in `src/variables/time.ts` geändert werden und ist in Sekunden angegeben.
+
+### Sharepoint
+
+In Sharepoint muss mithilfe von Power Automate ein GitHub Action Workflow getriggert werden.
+
+Dafür muss in Sharepoint oben rechts auf die drei Punkte gedrückt werden -> `Integrieren` -> `Power Automate` -> `Flows Anzeigen`
+
+In Power Automate muss dann oben auf `Neuer Flow` -> `Automatisierter Cloud-Flow` gedrückt werden.
+
+Im Popup kann man einfach auf `Überspringen` drücken.
+
+Als Trigger muss `Wenn eine Datei erstellt oder geändert wird (nur Eigenschaften)` von Sharepoint festgelegt werden.
+
+Die `Websiteadresse` sollte entsprechend ausgefüllt werden.
+
+Der `Name der Liste oder Bibliothek` ist `Dokumente`.
+
+Unter `Erweiterte Parameter` muss `Ordner` ausgewählt sein.
+
+Der Wert für `Ordner` ist `/Freigegebene Dokumente/Pfad/Zu/Ordner`, wobei der Pfad zum Ordner entsprechend angepasst werden muss. Es muss der Überordner der Excel Datei angegeben werden, nicht die Excel Datei selbst. Zum Beispiel `/Freigegebene Dokumente/Regie`. Dies kann einfach über das Ordner-Icon rechts neben dem Input gemacht werden.
+
+Danach muss über das `+` Symbol unter dem Trigger eine neue Aktion hinzugefügt werden: `Repository-Dispatch-Ereignis erstellen` von GitHub.
+
+Hier muss man sich mit seinem GitHub Account anmelden, damit der Workflow ausgeführt werden kann.
+
+Besiter und Name des Repositories sollten entsprechend ausgefüllt werden.
+
+Bei den Erweiterten Parametern braucht man `Ereignisname`, dieser muss auf `schedule_update` gesetzt werden.
 
 ## Project Setup
 
