@@ -305,7 +305,7 @@ function jumpTo(ts: number) {
           class="event-card"
           @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
         >
-          <header>Upcoming in {{ getFormattedTimeDiff(timeElapsed, stringToTimestamp(nextEvent.timestamp)) }}:</header>
+          <header>Upcoming in {{ getFormattedTimeDiff(timeElapsed, stringToTimestamp(nextEvent.timestamp)) }}</header>
           <div class="event-text">
             <div>{{ nextEvent.name }}</div>
           </div>
@@ -319,7 +319,7 @@ function jumpTo(ts: number) {
           class="event-card"
           @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
         >
-          <header>Current:</header>
+          <header>Current</header>
           <div class="event-text">
             <div>{{ currentEvent.name }}</div>
           </div>
