@@ -32,10 +32,11 @@ const close = () => dialog.value?.close();
         <fieldset role="group">
           <input
             v-model="id"
-            :minlength="idLength"
             :maxlength="idLength"
+            :minlength="idLength"
+            :pattern="`[0-9]{${idLength}}`"
+            inputmode="numeric"
             name="id"
-            pattern="[0-9]{4}"
             placeholder="0000"
             type="text"
             autofocus

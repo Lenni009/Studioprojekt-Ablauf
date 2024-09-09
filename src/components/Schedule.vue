@@ -44,7 +44,7 @@ const schedule: ScheduleItem[] = rawSchedule.map((item: RawScheduleItem, idx: nu
 
 schedule.push({
   name: 'Ende',
-  timestamp: timestampToString(timestamps.at(-1)),
+  timestamp: timestampToString(timestamps.at(-1) ?? 0),
 });
 
 const liveStartDate = ref(0); // unix timestamp

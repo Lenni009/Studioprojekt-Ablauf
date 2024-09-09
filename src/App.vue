@@ -7,7 +7,11 @@ onMounted(async () => {
     await navigator.wakeLock.request('screen');
   } catch (err) {
     // the wake lock request fails - usually system related, such being low on battery
-    console.log(`${err.name}, ${err.message}`);
+    if (err instanceof Error) {
+      console.error(`${err.name}, ${err.message}`);
+    } else {
+      console.error('Something went wrong!');
+    }
   }
 });
 </script>

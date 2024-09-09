@@ -19,7 +19,7 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
   <tr
     :class="{ 'is-completed': isCompleted }"
     class="table-row"
-    @click="$emit('skip', stringToTimestamp(data.timestamp))"
+    @click="emit('skip', stringToTimestamp(data.timestamp))"
   >
     <td>{{ data.name }}</td>
     <td>{{ data.timestamp }}</td>
