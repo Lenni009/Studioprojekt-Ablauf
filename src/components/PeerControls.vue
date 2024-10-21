@@ -56,10 +56,10 @@ const open = () => dialog.value?.showModal();
 .dialog-content {
   max-height: 100svh;
 
-  .qr-code {
+  :deep(.qr-code) {
     display: block;
     margin-inline: auto;
-    width: min(100%, 100svh) !important;
+    width: min(100%, 95svh) !important;
     height: auto !important;
   }
 }
