@@ -54,7 +54,7 @@ const close = () => dialog.value?.close();
   </dialog>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .disabled {
   opacity: 0.5;
   pointer-events: none;

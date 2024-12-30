@@ -25,7 +25,7 @@ onMounted(async () => {
   </main>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 header {
   margin-block-start: 2rem;
 

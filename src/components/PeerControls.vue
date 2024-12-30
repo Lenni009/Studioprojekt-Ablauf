@@ -48,7 +48,7 @@ const open = () => dialog.value?.showModal();
   </dialog>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .counter {
   margin: 0;
 }
