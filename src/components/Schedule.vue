@@ -108,11 +108,7 @@ const senderId = `${uniqueString}${currentYear}${paramsId}`;
 
 let connId = 0;
 const sendConn = ref<ConnObj[]>([]);
-const peer = new Peer(id, {
-  config: {
-    iceServers: [{ urls: 'stun:74.125.250.129:19302' }], // stun.l.google.com - Firefox does not support DNS names
-  },
-});
+const peer = new Peer(id);
 peer.on('open', () => {
   toast.info('Connected to Server');
   if (paramsId) peer.connect(senderId);
