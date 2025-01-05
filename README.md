@@ -94,7 +94,7 @@ Danach muss über das `+` Symbol unter dem Trigger eine neue Aktion hinzugefügt
 
 Hier muss man sich mit seinem GitHub Account anmelden, damit der Workflow ausgeführt werden kann.
 
-Besiter und Name des Repositories sollten entsprechend ausgefüllt werden.
+Besitzer und Name des Repositories sollten entsprechend ausgefüllt werden.
 
 Bei den Erweiterten Parametern braucht man `Ereignisname`, dieser muss auf `schedule_update` gesetzt werden.
 
