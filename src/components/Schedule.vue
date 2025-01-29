@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import rawSchedule from '@/assets/schedule.json';
-import { useTimestamp } from '@vueuse/core';
+import { useInterval, useTimestamp, useWebSocket } from '@vueuse/core';
 import { computed, reactive, ref, watch, watchEffect } from 'vue';
 import { expectedLength } from '@/variables/time';
 import TableItem from './TableItem.vue';
@@ -9,8 +9,6 @@ import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/he
 import PeerControls from './PeerControls.vue';
 import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
-import Peer, { type DataConnection } from 'peerjs';
-import { useToast } from 'vue-toastification';
 import { uniqueString, id, currentYear } from '@/variables/id';
 
 interface SyncData {
@@ -21,13 +19,6 @@ interface SyncData {
   pausedTime: number;
   pausedAtTimeElapsed: number;
 }
-
-interface ConnObj {
-  id: number;
-  conn: DataConnection;
-}
-
-const toast = useToast();
 
 const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length);
 lengths.push('0:00');
@@ -87,9 +78,9 @@ const data: SyncData = reactive({
   pausedAtTimeElapsed,
 });
 
-watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
-  sendSync(data)
-);
+watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () => {
+  if (!paramsId) sendSync(data);
+});
 
 function sync(syncData: SyncData) {
   const currentTimestamp = Date.now();
@@ -106,55 +97,93 @@ const searchParams = new URLSearchParams(paramsString);
 const paramsId = searchParams.get('id');
 const senderId = `${uniqueString}${currentYear}${paramsId}`;
 
-let connId = 0;
-const sendConn = ref<ConnObj[]>([]);
-const peer = new Peer(id);
-peer.on('open', () => {
-  toast.info('Connected to Server');
-  if (paramsId) peer.connect(senderId);
-});
+// let connId = 0;
+// const sendConn = ref<ConnObj[]>([]);
+// const peer = new Peer(id);
+// peer.on('open', () => {
+//   toast.info('Connected to Server');
+//   if (paramsId) peer.connect(senderId);
+// });
 
-peer.on('connection', (c) => {
-  if (!paramsId) {
-    toast.info('Connection established');
-    // this is for the sender
-    const conn = peer.connect(c.peer);
-    const connObj: ConnObj = {
-      id: connId++,
-      conn,
-    };
-    sendConn.value.push(connObj);
-    conn.on('open', () => {
-      toast.info('Client connected');
+const { status, data: wsData, send } = useWebSocket(`ws://localhost:8080/ws/${paramsId ? senderId : id}`);
+
+// incoming data handler
+watch(
+  wsData,
+  () => {
+    if (wsData.value === 'pong') return;
+    console.log('received!');
+    const parsedData = JSON.parse(wsData.value);
+    const isValidData = isSyncData(parsedData);
+    if (isValidData) sync(parsedData);
+  },
+  { immediate: true }
+);
+
+// outgoing data handler
+watch(
+  status,
+  () => {
+    if (!paramsId && status.value === 'OPEN') {
       sendSync(data);
-    });
+    }
+  },
+  { immediate: true }
+);
 
-    conn.on('close', () => {
-      sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id);
-      toast.info('Client disconnected');
-    });
+// heartbeat handler
+const counter = useInterval(2000);
+watch(
+  [counter, status],
+  () => {
+    if (status.value === 'OPEN') {
+      send('ping');
+    }
+  },
+  { immediate: true }
+);
 
-    addEventListener('beforeunload', () => {
-      sendConn.value.forEach(({ conn }) => conn.close());
-      peer.destroy();
-    });
-  } else {
-    toast.success('Connected!');
-    // this is for the receiver
-    c.on('data', (recData: unknown) => {
-      const isValidData = isSyncData(recData);
-      if (isValidData) sync(recData);
-    });
+// peer.on('connection', (c) => {
+//   if (!paramsId) {
+//     toast.info('Connection established');
+//     // this is for the sender
+//     const conn = peer.connect(c.peer);
+//     const connObj: ConnObj = {
+//       id: connId++,
+//       conn,
+//     };
+//     sendConn.value.push(connObj);
+//     conn.on('open', () => {
+//       toast.info('Client connected');
+//       sendSync(data);
+//     });
 
-    c.on('close', () => toast.error('Connection lost!'));
+//     conn.on('close', () => {
+//       sendConn.value = sendConn.value.filter((item) => item.id !== connObj.id);
+//       toast.info('Client disconnected');
+//     });
 
-    // clean up connections when tab is closed - This can be quirky on mobile, but doesn't impact functionality, see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#usage_notes
-    addEventListener('beforeunload', () => {
-      c.close();
-      peer.destroy();
-    });
-  }
-});
+//     addEventListener('beforeunload', () => {
+//       sendConn.value.forEach(({ conn }) => conn.close());
+//       peer.destroy();
+//     });
+//   } else {
+//     toast.success('Connected!');
+//     // this is for the receiver
+//     c.on('data', (recData: unknown) => {
+//       const isValidData = isSyncData(recData);
+//       if (isValidData) sync(recData);
+//     });
+
+//     c.on('close', () => toast.error('Connection lost!'));
+
+//     // clean up connections when tab is closed - This can be quirky on mobile, but doesn't impact functionality, see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#usage_notes
+//     addEventListener('beforeunload', () => {
+//       c.close();
+//       peer.destroy();
+//     });
+//   }
+// });
 
 function isSyncData(syncData: unknown): syncData is SyncData {
   const expectedDataKeys = Object.keys(data);
@@ -163,27 +192,26 @@ function isSyncData(syncData: unknown): syncData is SyncData {
   return validKeys.length === expectedDataKeys.length;
 }
 
-peer.on('disconnected', () => {
-  toast.warning('Connection lost. Trying to reconnect...');
-  peer.reconnect();
-});
-peer.on('close', () => {
-  sendConn.value = [];
-  toast.error('Connection destroyed!');
-});
-peer.on('error', (e) => {
-  console.log(e);
-  toast.error(`An error occurred, connection lost: ${e.type}`);
-});
+// peer.on('disconnected', () => {
+//   toast.warning('Connection lost. Trying to reconnect...');
+//   peer.reconnect();
+// });
+// peer.on('close', () => {
+//   sendConn.value = [];
+//   toast.error('Connection destroyed!');
+// });
+// peer.on('error', (e) => {
+//   console.log(e);
+//   toast.error(`An error occurred, connection lost: ${e.type}`);
+// });
 
 function sendSync(syncData: SyncData) {
-  sendConn.value.forEach(({ conn }) => {
-    try {
-      conn.send(syncData);
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  try {
+    console.log('sending sync');
+    send(JSON.stringify(syncData));
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 // Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
@@ -251,11 +279,11 @@ function jumpTo(ts: number) {
     class="controls-header"
   >
     <div>
-      <PeerControls :connected-clients="sendConn.length" />
+      <PeerControls :connected-clients="0" />
     </div>
     <div>
       <LiveModeToggle v-model="isLive" />
-      <CodeConnector v-if="!sendConn.length" />
+      <CodeConnector v-if="1" />
     </div>
   </div>
 
