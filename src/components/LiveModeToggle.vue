@@ -49,7 +49,7 @@ function switchLiveMode(e: Event) {
   </dialog>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .dialog-buttons {
   display: flex;
   flex-wrap: wrap;

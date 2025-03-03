@@ -424,7 +424,7 @@ function jumpTo(ts: number) {
   </div>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .controls-header {
   display: flex;
   flex-wrap: wrap;

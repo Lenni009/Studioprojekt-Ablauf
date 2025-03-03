@@ -54,7 +54,7 @@ Eine negative rote Zahl bedeutet, dass man langsamer als geplant ist. Eine grün
 
 ## Für andere Projekte verwenden
 
-Da die App ihre Daten von einer Excel Tabelle zieht, ist sie ziemlich flexibel und kann auch für Andere Projekte eingesetzt werden.
+Da die App ihre Daten von einer Excel Tabelle zieht, ist sie ziemlich flexibel und kann auch für andere Projekte eingesetzt werden.
 
 Jedoch sollte man trotzdem ein bisschen von Programmierung verstehen, wenn man die App für andere Projekte verwenden will.
 
@@ -94,7 +94,7 @@ Danach muss über das `+` Symbol unter dem Trigger eine neue Aktion hinzugefügt
 
 Hier muss man sich mit seinem GitHub Account anmelden, damit der Workflow ausgeführt werden kann.
 
-Besiter und Name des Repositories sollten entsprechend ausgefüllt werden.
+Besitzer und Name des Repositories sollten entsprechend ausgefüllt werden.
 
 Bei den Erweiterten Parametern braucht man `Ereignisname`, dieser muss auf `schedule_update` gesetzt werden.
 

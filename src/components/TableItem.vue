@@ -26,7 +26,7 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
   </tr>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .table-row {
   cursor: default;
 
