@@ -20,7 +20,7 @@
   "dependencies": {
     "@picocss/pico": "^2.1.1",
     "@vitejs/plugin-vue": "^5.2.4",
-    "peerjs": "^1.5.4",
+    "peerjs": "^1.5.5",
     "qrcode.vue": "^3.6.0",
     "vue-toastification": "^2.0.0-rc.5",
     "vue-tsc": "^2.2.10"
