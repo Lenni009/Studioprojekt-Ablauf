@@ -70,6 +70,6 @@ jobs:
           mv artifact/schedule.json schedule.json
 
       - name: Commit File to ${{ matrix.branch }}
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: Update Schedule
