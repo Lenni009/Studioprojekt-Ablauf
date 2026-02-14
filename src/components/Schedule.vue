@@ -300,7 +300,7 @@ function jumpTo(ts: number) {
       <Transition mode="out-in">
         <article
           v-if="nextEvent"
-          :aria-disabled="Boolean(paramsId) || undefined"
+          :inert="Boolean(paramsId)"
           :key="`${nextEvent.timestamp}${nextEvent.name}`"
           class="event-card"
           @click="jumpTo(stringToTimestamp(nextEvent.timestamp))"
@@ -314,7 +314,7 @@ function jumpTo(ts: number) {
       <Transition mode="out-in">
         <article
           v-if="currentEvent"
-          :aria-disabled="Boolean(paramsId) || undefined"
+          :inert="Boolean(paramsId)"
           :key="`${currentEvent.timestamp}${currentEvent.name}`"
           class="event-card"
           @click="jumpTo(stringToTimestamp(currentEvent.timestamp))"
@@ -391,8 +391,8 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in futureItems"
             v-memo="[completedItems]"
-            :aria-disabled="Boolean(paramsId) || undefined"
             :data="item"
+            :inert="Boolean(paramsId)"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
             @skip="jumpTo"
@@ -416,8 +416,8 @@ function jumpTo(ts: number) {
           <TableItem
             v-for="item in completedItems"
             v-memo="[completedItems]"
-            :aria-disabled="Boolean(paramsId) || undefined"
             :data="item"
+            :inert="Boolean(paramsId)"
             :key="`${item.timestamp}${item.name}`"
             :ts="timeElapsed"
             @skip="jumpTo"
@@ -502,20 +502,16 @@ function jumpTo(ts: number) {
     gap: 1rem;
 
     .event-card {
-      cursor: default;
+      cursor: pointer;
 
-      &:not([aria-disabled]) {
-        cursor: pointer;
-
-        &:hover:not(.v-enter-active, .v-leave-active) {
-          &,
-          & * {
-            background-color: color-mix(
-              in srgb,
-              var(--pico-contrast-background) 3%,
-              var(--pico-card-background-color) 100%
-            );
-          }
+      &:hover:not(.v-enter-active, .v-leave-active) {
+        &,
+        & * {
+          background-color: color-mix(
+            in srgb,
+            var(--pico-contrast-background) 3%,
+            var(--pico-card-background-color) 100%
+          );
         }
       }
 
