@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { ScheduleItem } from '@/types/schedule';
 import { computed } from 'vue';
 import { stringToTimestamp } from '@/helpers/time';
-import type { ScheduleItem } from '@/types/schedule';
 
 const props = defineProps<{
   data: ScheduleItem;

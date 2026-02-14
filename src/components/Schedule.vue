@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import rawSchedule from '@/assets/schedule.json';
-import { useTimestamp } from '@vueuse/core';
+import { type DataConnection, Peer } from 'peerjs';
+import type { RawScheduleItem, ScheduleItem } from '@/types/schedule';
 import { computed, reactive, ref, watch, watchEffect } from 'vue';
-import { expectedLength } from '@/variables/time';
-import TableItem from './TableItem.vue';
-import type { ScheduleItem, RawScheduleItem } from '@/types/schedule';
-import { getFormattedTimeDiff, timestampToString, stringToTimestamp } from '@/helpers/time';
-import PeerControls from './PeerControls.vue';
+import { currentYear, id, uniqueString } from '@/variables/id';
+import { getFormattedTimeDiff, stringToTimestamp, timestampToString } from '@/helpers/time';
 import CodeConnector from './CodeConnector.vue';
 import LiveModeToggle from './LiveModeToggle.vue';
-import Peer, { type DataConnection } from 'peerjs';
+import PeerControls from './PeerControls.vue';
+import TableItem from './TableItem.vue';
+import { expectedLength } from '@/variables/time';
+import rawSchedule from '@/assets/schedule.json';
+import { useTimestamp } from '@vueuse/core';
 import { useToast } from 'vue-toastification';
-import { uniqueString, id, currentYear } from '@/variables/id';
 
 interface SyncData {
   timeElapsed: number;
@@ -33,6 +33,7 @@ const lengths: string[] = rawSchedule.map((item: RawScheduleItem) => item.length
 lengths.push('0:00');
 
 const timestamps: number[] = [0];
+// oxlint-disable-next-line unicorn/no-array-for-each
 lengths.forEach((item, idx) => timestamps.push(stringToTimestamp(item) + timestamps[idx]));
 
 const totalLengthInSeconds = (timestamps.at(-1) ?? 0) / 1000;
@@ -64,12 +65,12 @@ watch(
     pause();
     reset();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const timestamp = useTimestamp({ offset: 0 }); // unix timestamp
 const timeElapsed = computed(() =>
-  isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value
+  isPaused.value ? pausedAtTimeElapsed.value : timestamp.value - pausedTime.value - startDate.value,
 );
 const timeElapsedInSeconds = computed(() => timeElapsed.value / 1000);
 const actualTimeElapsed = computed(() => timestamp.value - liveStartDate.value);
@@ -88,7 +89,7 @@ const data: SyncData = reactive({
 });
 
 watch([startDate, isPaused, pausedAtTimeElapsed, pausedAtTimestamp, pausedTime, isLive, liveStartDate], () =>
-  sendSync(data)
+  sendSync(data),
 );
 
 function sync(syncData: SyncData) {
@@ -101,7 +102,7 @@ function sync(syncData: SyncData) {
   pausedAtTimestamp.value = currentTimestamp - syncData.pausedAtTimeElapsed;
 }
 
-const paramsString = window.location.search;
+const paramsString = globalThis.location.search;
 const searchParams = new URLSearchParams(paramsString);
 const paramsId = searchParams.get('id');
 const senderId = `${uniqueString}${currentYear}${paramsId}`;
@@ -115,7 +116,22 @@ peer.on('open', () => {
 });
 
 peer.on('connection', (c) => {
-  if (!paramsId) {
+  if (paramsId) {
+    toast.success('Connected!');
+    // this is for the receiver
+    c.on('data', (recData: unknown) => {
+      const isValidData = isSyncData(recData);
+      if (isValidData) sync(recData);
+    });
+
+    c.on('close', () => toast.error('Connection lost!'));
+
+    // clean up connections when tab is closed - This can be quirky on mobile, but doesn't impact functionality, see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#usage_notes
+    addEventListener('beforeunload', () => {
+      c.close();
+      peer.destroy();
+    });
+  } else {
     toast.info('Connection established');
     // this is for the sender
     const conn = peer.connect(c.peer);
@@ -135,22 +151,8 @@ peer.on('connection', (c) => {
     });
 
     addEventListener('beforeunload', () => {
+      // oxlint-disable-next-line unicorn/no-array-for-each
       sendConn.value.forEach(({ conn }) => conn.close());
-      peer.destroy();
-    });
-  } else {
-    toast.success('Connected!');
-    // this is for the receiver
-    c.on('data', (recData: unknown) => {
-      const isValidData = isSyncData(recData);
-      if (isValidData) sync(recData);
-    });
-
-    c.on('close', () => toast.error('Connection lost!'));
-
-    // clean up connections when tab is closed - This can be quirky on mobile, but doesn't impact functionality, see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event#usage_notes
-    addEventListener('beforeunload', () => {
-      c.close();
       peer.destroy();
     });
   }
@@ -171,17 +173,18 @@ peer.on('close', () => {
   sendConn.value = [];
   toast.error('Connection destroyed!');
 });
-peer.on('error', (e) => {
-  console.log(e);
-  toast.error(`An error occurred, connection lost: ${e.type}`);
+peer.on('error', (error) => {
+  console.error(error);
+  toast.error(`An error occurred, connection lost: ${error.type}`);
 });
 
 function sendSync(syncData: SyncData) {
+  // oxlint-disable-next-line unicorn/no-array-for-each
   sendConn.value.forEach(({ conn }) => {
     try {
       conn.send(syncData);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
   });
 }
@@ -189,10 +192,11 @@ function sendSync(syncData: SyncData) {
 // Chrome updates the HTML every millisecond, so we have to avoid this by only updating the dependencies when something actually changed.
 const completedItems = ref<ScheduleItem[]>([]);
 
-const getCompletedItems = () =>
-  schedule.filter((item: ScheduleItem) => timeElapsed.value >= stringToTimestamp(item.timestamp));
+const getCompletedItems = () => schedule.filter((item) => timeElapsed.value >= stringToTimestamp(item.timestamp));
 
-const updateCompletedItems = () => (completedItems.value = getCompletedItems().toReversed());
+function updateCompletedItems() {
+  completedItems.value = getCompletedItems().toReversed();
+}
 
 watchEffect(() => {
   const newFilter = getCompletedItems();

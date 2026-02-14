@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { foreignUrl, uniqueId } from '@/variables/id';
 import QrcodeVue from 'qrcode.vue';
+import { ref } from 'vue';
 
 defineProps<{
   connectedClients: number;

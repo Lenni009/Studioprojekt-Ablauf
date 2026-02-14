@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const isLive = defineModel({ type: Boolean });
+const isLive = defineModel<boolean>({ required: true });
 
 const liveDialog = ref<HTMLDialogElement | null>(null);
 
@@ -16,11 +16,10 @@ function switchLiveMode(e: Event) {
 </script>
 
 <template>
-  <label for="isLive">
+  <label>
     <input
       v-model="isLive"
       :aria-checked="isLive"
-      id="isLive"
       role="switch"
       type="checkbox"
       @click="switchLiveMode"

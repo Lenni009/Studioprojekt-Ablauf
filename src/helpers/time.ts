@@ -1,12 +1,12 @@
 export function stringToTimestamp(time: string): number {
-  const [minutes, seconds] = time.split(':').map((item) => parseInt(item));
-  return (minutes * 60 + seconds) * 1000;
+  const [minutes, seconds] = time.split(':').map((item) => Number.parseInt(item));
+  return (minutes * 60 + seconds) * 1000; // oxlint-disable-line no-magic-numbers
 }
 
 export function timestampToString(time: number): string {
   const timeInSeconds = Math.floor(time / 1000);
-  const minutes = Math.floor(timeInSeconds / 60);
-  const seconds = timeInSeconds % 60;
+  const minutes = Math.floor(timeInSeconds / 60); // oxlint-disable-line no-magic-numbers
+  const seconds = timeInSeconds % 60; // oxlint-disable-line no-magic-numbers
   return `${Math.floor(minutes)}:${seconds.toString().padStart(2, '0')}`;
 }
 
