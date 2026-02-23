@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import type { ScheduleItem } from '@/types/schedule';
 import { computed } from 'vue';
 import { stringToTimestamp } from '@/helpers/time';
-import type { ScheduleItem } from '@/types/schedule';
 
 const props = defineProps<{
   data: ScheduleItem;
   ts: number;
+  inert: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -18,6 +19,7 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
 <template>
   <tr
     :class="{ 'is-completed': isCompleted }"
+    :inert
     class="table-row"
     @click="emit('skip', stringToTimestamp(data.timestamp))"
   >
@@ -28,14 +30,10 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
 
 <style scoped>
 .table-row {
-  cursor: default;
+  cursor: pointer;
 
-  &:not([aria-disabled]) {
-    cursor: pointer;
-
-    &:hover {
-      background-color: var(--pico-table-row-stripped-background-color);
-    }
+  &:hover {
+    background-color: var(--pico-table-row-stripped-background-color);
   }
 
   td {
@@ -47,7 +45,7 @@ const isCompleted = computed(() => props.ts >= stringToTimestamp(props.data.time
     background-color: green;
     color: white;
 
-    &:not([aria-disabled]):hover {
+    &:hover {
       background-color: color-mix(in srgb, green, var(--pico-table-row-stripped-background-color));
     }
   }

@@ -4,7 +4,7 @@ import { uniquenessPrecision as idLength } from '@/variables/id';
 
 const id = ref('');
 const dialog = ref<HTMLDialogElement | null>(null);
-const link = computed(() => `${window.location.origin}?id=${id.value}`);
+const link = computed(() => `${globalThis.location.origin}?id=${id.value}`);
 
 const isIdValid = computed(() => id.value.length === idLength);
 

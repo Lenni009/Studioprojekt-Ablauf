@@ -1,8 +1,8 @@
 import '@picocss/pico';
-import App from './App.vue';
-import { createApp } from 'vue';
-import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
+import App from './App.vue';
+import Toast from 'vue-toastification';
+import { createApp } from 'vue';
 
 const app = createApp(App);
 
