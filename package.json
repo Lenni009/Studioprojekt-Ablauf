@@ -21,7 +21,7 @@
     "vue-tsc": "^3.3.4"
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "@vueuse/core": "^14.3.0",
     "oxfmt": "^0.53.0",
     "oxlint": "^1.68.0",
