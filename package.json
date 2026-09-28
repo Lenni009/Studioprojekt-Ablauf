@@ -24,7 +24,7 @@
     "@types/node": "^26.5.1",
     "@vueuse/core": "^15.0.0",
     "oxfmt": "^0.70.0",
-    "oxlint": "^1.83.0",
+    "oxlint": "^1.85.0",
     "typescript": "^5.9.3",
     "vite": "^8.3.0",
     "vue": "^3.5.42"
